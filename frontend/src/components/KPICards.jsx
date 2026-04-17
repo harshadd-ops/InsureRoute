@@ -1,4 +1,4 @@
-import { motion, useSpring, useTransform, animate } from 'framer-motion'
+import { motion, animate } from 'framer-motion'
 import { useEffect, useRef } from 'react'
 import { AlertTriangle, Clock, TrendingUp, PiggyBank } from 'lucide-react'
 
@@ -30,11 +30,8 @@ const CARDS = [
     label: 'SLA Breach Rate',
     suffix: '%',
     icon: AlertTriangle,
-    grad: 'from-red-900/40 to-red-800/10',
-    border: 'border-red-500/20',
-    iconBg: 'bg-danger/20',
+    accent: 'border-t-danger',
     iconColor: 'text-danger',
-    textColor: 'text-danger',
     desc: 'of total shipments',
     threshold: (v) => v > 10 ? 'danger' : v > 5 ? 'warning' : 'success',
   },
@@ -44,11 +41,8 @@ const CARDS = [
     suffix: '%',
     prefix: '+',
     icon: Clock,
-    grad: 'from-yellow-900/40 to-yellow-800/10',
-    border: 'border-yellow-500/20',
-    iconBg: 'bg-warning/20',
+    accent: 'border-t-warning',
     iconColor: 'text-warning',
-    textColor: 'text-warning',
     desc: 'vs scheduled transit',
     threshold: (v) => v > 15 ? 'danger' : v > 7 ? 'warning' : 'success',
   },
@@ -57,12 +51,9 @@ const CARDS = [
     label: 'Current Risk',
     suffix: '%',
     icon: TrendingUp,
-    grad: 'from-blue-900/40 to-blue-800/10',
-    border: 'border-blue-500/20',
-    iconBg: 'bg-primary/20',
+    accent: 'border-t-primary',
     iconColor: 'text-primary',
-    textColor: 'text-primary',
-    desc: 'disruption probability',
+    desc: 'system probability',
     threshold: (v) => v > 60 ? 'danger' : v > 30 ? 'warning' : 'success',
   },
   {
@@ -70,12 +61,9 @@ const CARDS = [
     label: 'Cost Savings',
     suffix: '%',
     icon: PiggyBank,
-    grad: 'from-green-900/40 to-green-800/10',
-    border: 'border-green-500/20',
-    iconBg: 'bg-success/20',
+    accent: 'border-t-success',
     iconColor: 'text-success',
-    textColor: 'text-success',
-    desc: 'via rerouting hedge',
+    desc: 'via active rerouting',
     threshold: () => 'success',
   },
 ]
@@ -83,7 +71,7 @@ const CARDS = [
 const LEVEL_STYLES = {
   danger:  'text-danger',
   warning: 'text-warning',
-  success: 'text-success',
+  success: 'text-text', // Keep normal text for success looking metrics instead of neon green
 }
 
 export default function KPICards({ kpis }) {
@@ -95,27 +83,23 @@ export default function KPICards({ kpis }) {
         const value = kpis[card.key] ?? 0
         const level = card.threshold(value)
         const Icon  = card.icon
+        
         return (
           <motion.div
             key={card.key}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.08, duration: 0.5 }}
-            whileHover={{ scale: 1.02, y: -2 }}
-            className={`glass glass-hover p-5 flex flex-col gap-3 bg-gradient-to-br ${card.grad} ${card.border}`}
+            transition={{ delay: i * 0.05, duration: 0.4 }}
+            className={`glass p-5 flex flex-col gap-2 rounded-xl border-t-2 ${card.accent}`}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-muted uppercase tracking-widest">
+            <div className="flex items-center gap-2 mb-1">
+              <Icon size={16} className={card.iconColor} />
+              <span className="text-sm font-semibold text-slate-600">
                 {card.label}
               </span>
-              <div className={`p-1.5 rounded-lg ${card.iconBg}`}>
-                <Icon size={14} className={card.iconColor} />
-              </div>
             </div>
-
-            {/* Main value */}
-            <div className={`text-4xl font-black leading-none ${LEVEL_STYLES[level]}`}>
+            
+            <div className={`text-4xl font-black tracking-tight ${LEVEL_STYLES[level]}`}>
               <AnimatedNumber
                 value={value}
                 prefix={card.prefix || ''}
@@ -123,32 +107,11 @@ export default function KPICards({ kpis }) {
                 decimals={1}
               />
             </div>
-
-            {/* Footer */}
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted">{card.desc}</span>
-              <MiniSparkle level={level} />
-            </div>
+            
+            <span className="text-xs font-medium text-muted mt-1">{card.desc}</span>
           </motion.div>
         )
       })}
-    </div>
-  )
-}
-
-function MiniSparkle({ level }) {
-  const colors = { danger: 'bg-danger', warning: 'bg-warning', success: 'bg-success' }
-  return (
-    <div className="flex gap-0.5 items-end h-5">
-      {[3, 5, 4, 7, 6, 8, 5].map((h, i) => (
-        <motion.div
-          key={i}
-          className={`w-1 rounded-full ${colors[level]} opacity-60`}
-          style={{ height: `${h * 2}px` }}
-          animate={{ scaleY: [1, 0.6, 1] }}
-          transition={{ delay: i * 0.12, duration: 1.5, repeat: Infinity }}
-        />
-      ))}
     </div>
   )
 }

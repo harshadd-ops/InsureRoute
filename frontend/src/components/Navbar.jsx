@@ -1,77 +1,117 @@
 import { motion } from 'framer-motion'
-import { Shield, Activity, Wifi, WifiOff, Clock } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { Shield, Zap, RefreshCw, ChevronDown } from 'lucide-react'
+import { useState } from 'react'
 
-export default function Navbar({ isLive, isMock, disrupted }) {
-  const [time, setTime] = useState(new Date())
-  useEffect(() => {
-    const t = setInterval(() => setTime(new Date()), 1000)
-    return () => clearInterval(t)
-  }, [])
+export default function Navbar({ isLive, isMock, disrupted, params, onParamsChange, onInject, onRefresh, loading }) {
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  function toggle(key) {
+    onParamsChange({ ...params, [key]: !params[key] })
+  }
+  function slider(key, val) {
+    onParamsChange({ ...params, [key]: val })
+  }
 
   return (
     <motion.nav
-      initial={{ y: -60, opacity: 0 }}
+      initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: 'easeOut' }}
-      className="relative z-20 flex items-center justify-between px-6 py-3
-                 border-b border-border/50 bg-bg/80 backdrop-blur-xl"
+      className="relative z-50 flex items-center justify-between px-6 py-3
+                 border-b border-border bg-white shadow-sm"
     >
       {/* ── Left: Logo ── */}
       <div className="flex items-center gap-3">
-        <div className={`relative flex items-center justify-center w-9 h-9 rounded-xl
-                        ${disrupted ? 'bg-danger/20 glow-red' : 'bg-primary/20 glow-blue'} transition-all duration-700`}>
-          <Shield size={18} className={disrupted ? 'text-danger' : 'text-primary'} />
-          {disrupted && (
-            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-danger rounded-full
-                           border-2 border-bg animate-pulse" />
-          )}
+        <div className={`p-1.5 rounded-lg ${disrupted ? 'bg-danger/10 text-danger' : 'bg-primary/10 text-primary'}`}>
+          <Shield size={20} />
         </div>
         <div>
-          <h1 className="font-black text-lg tracking-tight gradient-text">InsureRoute</h1>
-          <p className="text-xs text-muted leading-none">Route Smarter. Hedge Better.</p>
+          <h1 className="font-bold text-lg text-text tracking-tight leading-none">InsureRoute</h1>
+          <p className="text-[10px] text-muted font-medium uppercase tracking-widest mt-0.5">SaaS Dashboard</p>
+        </div>
+        
+        {/* Connection status tag */}
+        <div className="ml-4 flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] uppercase font-bold
+                      bg-slate-50 border-border text-muted">
+          <div className={`w-1.5 h-1.5 rounded-full ${isMock ? 'bg-warning' : 'bg-success'}`} />
+          {isMock ? 'Mocking' : 'Live Data'}
         </div>
       </div>
 
-      {/* ── Center: Status pills ── */}
-      <div className="hidden md:flex items-center gap-2">
-        <StatusPill
-          label={disrupted ? 'DISRUPTION' : 'OPERATIONAL'}
-          color={disrupted ? 'danger' : 'success'}
-          pulse
-        />
-        <StatusPill label="ML ACTIVE" color="primary" />
-        <StatusPill label="GRAPH ENGINE" color="primary" />
-      </div>
+      {/* ── Right: Controls ── */}
+      <div className="flex items-center gap-3 relative">
+        <label className="flex items-center gap-2 text-xs font-semibold text-text cursor-pointer hover:bg-slate-50 px-2 py-1 rounded border border-transparent hover:border-border transition-all">
+          <input type="checkbox" checked={params.monsoon} onChange={() => toggle('monsoon')} className="accent-primary" />
+          Monsoon
+        </label>
+        
+        <label className="flex items-center gap-2 text-xs font-semibold text-text cursor-pointer hover:bg-slate-50 px-2 py-1 rounded border border-transparent hover:border-border transition-all">
+          <input type="checkbox" checked={params.perishable} onChange={() => toggle('perishable')} className="accent-primary" />
+          Perishable
+        </label>
 
-      {/* ── Right: Connection + clock ── */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1.5 text-xs">
-          {isMock
-            ? <><WifiOff size={13} className="text-warning" /><span className="text-warning">Mock Mode</span></>
-            : <><Wifi size={13} className="text-success" /><span className="text-success">Live API</span></>
-          }
+        <div className="w-px h-5 bg-border mx-2" />
+
+        <button
+          onClick={onRefresh}
+          disabled={loading}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border border-border
+                     text-text hover:bg-slate-50 disabled:opacity-50 transition-all"
+        >
+          <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
+          Refresh
+        </button>
+
+        <button
+          onClick={onInject}
+          disabled={loading}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold flex-shrink-0 cursor-pointer
+                     bg-yellow-500 hover:bg-yellow-600 text-white rounded shadow-sm disabled:opacity-50 transition-all"
+        >
+          <Zap size={12} />
+          Force Disruption
+        </button>
+
+        {/* Dropdown for sliders */}
+        <div className="relative">
+          <button 
+             onClick={() => setMenuOpen(!menuOpen)}
+             className="p-1.5 rounded border border-border text-muted hover:bg-slate-50 transition-colors"
+          >
+            <ChevronDown size={14} className={menuOpen ? "rotate-180 transition-transform" : "transition-transform"} />
+          </button>
+          
+          {menuOpen && (
+            <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-border rounded-xl shadow-lg p-4 z-50 flex flex-col gap-4">
+              <div className="text-xs font-bold text-muted uppercase tracking-wider mb-2">Advanced Config</div>
+              
+              <SliderRow label="Threshold" value={params.threshold} min={-0.5} max={0} step={0.01} format={v => v.toFixed(2)} onChange={v => slider('threshold', v)} />
+              <SliderRow label="Weather Mult" value={params.weatherMult} min={1} max={2} step={0.1} format={v => `x${v}`} onChange={v => slider('weatherMult', v)} />
+              <SliderRow label="Perish Mult" value={params.perishMult} min={1} max={2.5} step={0.1} format={v => `x${v}`} onChange={v => slider('perishMult', v)} />
+              <SliderRow label="Cargo Val" value={params.cargoValue} min={10000} max={500000} step={10000} format={v => `₹${v / 1000}k`} onChange={v => slider('cargoValue', +v)} />
+            </div>
+          )}
         </div>
-        <div className="hidden md:flex items-center gap-1.5 text-xs text-muted">
-          <Clock size={12} />
-          <span className="font-mono">{time.toLocaleTimeString()}</span>
-        </div>
-        <div className={`status-dot ${isLive ? 'bg-success' : 'bg-muted'}`} />
       </div>
     </motion.nav>
   )
 }
 
-function StatusPill({ label, color, pulse }) {
-  const colors = {
-    danger:  'bg-danger/15  text-danger  border-danger/30',
-    success: 'bg-success/15 text-success border-success/30',
-    primary: 'bg-primary/15 text-primary border-primary/30',
-  }
+function SliderRow({ label, value, min, max, step, format, onChange }) {
+  const pct = ((value - min) / (max - min)) * 100
   return (
-    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold ${colors[color]}`}>
-      {pulse && <span className={`w-1.5 h-1.5 rounded-full bg-current ${pulse ? 'animate-pulse' : ''}`} />}
-      {label}
+    <div className="space-y-1">
+      <div className="flex justify-between text-xs">
+        <span className="text-text font-medium">{label}</span>
+        <span className="text-primary font-semibold">{format(value)}</span>
+      </div>
+      <input
+        type="range"
+        min={min} max={max} step={step}
+        value={value}
+        onChange={e => onChange(+e.target.value)}
+        className="w-full h-1 bg-slate-200 rounded appearance-none cursor-pointer"
+        style={{ background: `linear-gradient(to right, #eab308 ${pct}%, #e2e8f0 ${pct}%)` }}
+      />
     </div>
   )
 }

@@ -1,40 +1,6 @@
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useEffect, useRef } from 'react'
-import { Shield, TrendingDown, TrendingUp, Zap } from 'lucide-react'
-import { RadialBarChart, RadialBar, ResponsiveContainer, PolarAngleAxis } from 'recharts'
-
-function AnimatedNumber({ value, prefix = '', suffix = '', decimals = 0, large = false }) {
-  const ref = useRef(null)
-  const prev = useRef(0)
-  useEffect(() => {
-    const node = ref.current
-    if (!node) return
-    const from = prev.current
-    prev.current = value
-    let raf
-    const start = performance.now()
-    const dur = 1000
-    function step(now) {
-      const t = Math.min((now - start) / dur, 1)
-      const ease = 1 - Math.pow(1 - t, 3)
-      const cur = from + (value - from) * ease
-      node.textContent = prefix + cur.toFixed(decimals) + suffix
-      if (t < 1) raf = requestAnimationFrame(step)
-    }
-    raf = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(raf)
-  }, [value, prefix, suffix, decimals])
-  return (
-    <span
-      ref={ref}
-      className={large
-        ? 'text-5xl font-black tracking-tight leading-none'
-        : 'text-2xl font-bold leading-none'}
-    >
-      {prefix}{value.toFixed(decimals)}{suffix}
-    </span>
-  )
-}
+import { Shield, ArrowRight, DollarSign } from 'lucide-react'
 
 export default function InsurancePanel({ insurance, disrupted }) {
   if (!insurance) return null
@@ -46,158 +12,90 @@ export default function InsurancePanel({ insurance, disrupted }) {
   } = insurance
 
   const riskPct = Math.round((disruption_probability ?? 0) * 100)
-  const gaugeColor = riskPct > 60 ? '#ef4444' : riskPct > 30 ? '#facc15' : '#22c55e'
-  const gaugeData = [{ value: riskPct, fill: gaugeColor }]
+  const isHighRisk = riskPct > 35
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 20 }}
+      initial={{ opacity: 0, x: 10 }}
       animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.5 }}
-      className="glass flex flex-col gap-5 p-5 h-full"
+      className="glass p-5 flex flex-col h-full bg-white relative overflow-hidden"
     >
-      {/* Header */}
-      <div className="flex items-center gap-2">
-        <div className={`p-1.5 rounded-lg ${disrupted ? 'bg-danger/20' : 'bg-primary/20'}`}>
-          <Shield size={15} className={disrupted ? 'text-danger' : 'text-primary'} />
+      {/* Top Header Block */}
+      <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
+        <div className="flex items-center gap-2">
+          <Shield size={18} className="text-slate-800" />
+          <span className="font-bold text-slate-800 text-lg">Insurance Premium</span>
         </div>
-        <span className="text-sm font-semibold text-text">Insurance Hedge Panel</span>
-        {disrupted && (
-          <motion.span
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            className="ml-auto text-xs bg-danger/20 text-danger border border-danger/30
-                       px-2 py-0.5 rounded-full font-semibold"
-          >
-            HIGH RISK
-          </motion.span>
+        {isHighRisk && (
+          <span className="text-[10px] font-bold bg-red-100 text-danger border border-red-200 px-2 py-1 rounded">
+            ELEVATED RISK ({riskPct}%)
+          </span>
         )}
       </div>
 
-      {/* Risk Gauge */}
-      <div className="flex items-center gap-4">
-        <div className="relative w-28 h-28 flex-shrink-0">
-          <ResponsiveContainer width="100%" height="100%">
-            <RadialBarChart
-              cx="50%" cy="50%"
-              innerRadius="65%" outerRadius="100%"
-              startAngle={225} endAngle={-45}
-              data={gaugeData}
-            >
-              <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
-              <RadialBar
-                background={{ fill: '#1e293b' }}
-                dataKey="value"
-                cornerRadius={8}
-                animationBegin={0}
-                animationDuration={1200}
-              />
-            </RadialBarChart>
-          </ResponsiveContainer>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-2xl font-black" style={{ color: gaugeColor }}>{riskPct}%</span>
-            <span className="text-[9px] text-muted font-semibold uppercase tracking-wide">RISK</span>
-          </div>
+      {/* Breakdown List */}
+      <div className="space-y-4 mb-6 flex-1">
+        
+        <DataRow label="Base Cargo Value" value={`₹${cargo_value.toLocaleString('en-IN')}`} strong />
+        
+        <div className="py-2 space-y-2">
+          <DataRow label="Probability Impact" value={`${riskPct}%`} subtext="Isolation Forest Result" />
+          <DataRow label="Calculated Base Premium" value={`₹${(base_premium ?? 0).toLocaleString('en-IN')}`} />
         </div>
 
-        {/* Multipliers */}
-        <div className="flex-1 space-y-2">
-          <MultiplierRow label="Weather" value={weather_multiplier} active={weather_multiplier > 1} icon="" />
-          <MultiplierRow label="Perishable" value={perishable_multiplier} active={perishable_multiplier > 1} icon="" />
-          <div className="flex justify-between text-xs pt-1 border-t border-border/50">
-            <span className="text-muted">Cargo Value</span>
-            <span className="text-text font-semibold">₹{cargo_value.toLocaleString('en-IN')}</span>
-          </div>
-          <div className="flex justify-between text-xs">
-            <span className="text-muted">Base Premium</span>
-            <span className="text-text">₹{(base_premium ?? 0).toLocaleString('en-IN')}</span>
-          </div>
+        <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 space-y-2">
+          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Applied Actuarial Multipliers</div>
+          <DataRow label="Weather Factor" value={`x${weather_multiplier}`} highlight={weather_multiplier > 1} />
+          <DataRow label="Perishable Cargo" value={`x${perishable_multiplier}`} highlight={perishable_multiplier > 1} />
         </div>
       </div>
 
-      {/* Before / After */}
-      <div className="grid grid-cols-2 gap-3">
-        <CostBox label="BEFORE REROUTE" value={before_cost} accent="danger" icon={TrendingUp} />
-        <CostBox label="AFTER REROUTE"  value={after_cost}  accent="success" icon={TrendingDown} />
-      </div>
-
-      {/* Savings banner */}
-      <motion.div
-        key={savings_pct}
-        initial={{ scale: 0.95, opacity: 0.5 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.6, type: 'spring' }}
-        className={`rounded-xl p-4 flex items-center justify-between
-                   ${disrupted
-                     ? 'bg-gradient-to-r from-success/20 to-success/5 border border-success/30 glow-green'
-                     : 'bg-gradient-to-r from-surface to-bg border border-border/50'}`}
-      >
-        <div>
-          <div className="text-xs text-muted font-semibold uppercase tracking-widest mb-1">
-            Est. Savings via Rerouting
-          </div>
-          <div className="gradient-text-green font-black text-3xl leading-none">
-            ₹{(savings ?? 0).toLocaleString('en-IN')}
-          </div>
+      {/* Quote Comparison (Before / After Reroute) */}
+      <div className="flex items-center justify-between bg-slate-100 p-4 rounded-xl border border-slate-200 mb-4">
+        <div className="flex flex-col">
+          <span className="text-xs text-slate-500 font-semibold mb-1">Standard Route</span>
+          <span className={`text-xl font-black ${disrupted ? 'text-danger line-through opacity-70' : 'text-slate-800'}`}>
+            ₹{(before_cost ?? 0).toLocaleString('en-IN')}
+          </span>
         </div>
-        <div className="text-right">
-          <div className={`text-4xl font-black ${disrupted ? 'text-success' : 'text-muted'}`}>
-            {savings_pct}%
-          </div>
-          <div className="text-xs text-muted">reduction</div>
-        </div>
-      </motion.div>
-
-      {/* Animated savings bar */}
-      <div className="space-y-1">
-        <div className="flex justify-between text-xs text-muted">
-          <span>Hedge Reduction Progress</span>
-          <span>{savings_pct}%</span>
-        </div>
-        <div className="h-1.5 bg-surface rounded-full overflow-hidden">
-          <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-success to-emerald-400"
-            initial={{ width: 0 }}
-            animate={{ width: `${savings_pct}%` }}
-            transition={{ duration: 1, ease: [0.4, 0, 0.2, 1] }}
-          />
+        <ArrowRight className="text-slate-400" />
+        <div className="flex flex-col text-right">
+          <span className="text-xs text-slate-500 font-semibold mb-1">Hedged Route</span>
+          <span className="text-2xl font-black text-slate-900">
+            ₹{(after_cost ?? 0).toLocaleString('en-IN')}
+          </span>
         </div>
       </div>
+
+      {/* Savings Summary Line */}
+      {savings > 0 && (
+        <div className="flex items-center justify-between pt-4 border-t border-dashed border-slate-300">
+          <div className="flex items-center gap-1.5 text-success">
+            <DollarSign size={16} />
+            <span className="text-sm font-bold">Dynamic Savings Evaluated</span>
+          </div>
+          <div className="text-right flex flex-col">
+            <span className="text-lg font-black text-success">₹{(savings ?? 0).toLocaleString('en-IN')}</span>
+            <span className="text-[10px] text-slate-500 font-semibold uppercase">{savings_pct}% Reduction</span>
+          </div>
+        </div>
+      )}
     </motion.div>
   )
 }
 
-function MultiplierRow({ label, value, active, icon }) {
+function DataRow({ label, value, strong, subtext, highlight }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs">{icon}</span>
-      <span className="text-xs text-muted w-16">{label}</span>
-      <div className="flex-1 h-1 bg-surface rounded-full overflow-hidden">
-        <div
-          className={`h-full rounded-full transition-all duration-700 ${active ? 'bg-warning' : 'bg-muted'}`}
-          style={{ width: active ? `${((value - 1) / 0.6) * 100}%` : '0%' }}
-        />
+    <div className="flex items-center justify-between text-sm">
+      <div className="flex flex-col">
+        <span className={`${strong ? 'font-semibold text-slate-800' : 'text-slate-500 font-medium'}`}>
+          {label}
+        </span>
+        {subtext && <span className="text-[10px] text-slate-400 mt-0.5">{subtext}</span>}
       </div>
-      <span className={`text-xs font-bold ${active ? 'text-warning' : 'text-muted'}`}>×{value}</span>
-    </div>
-  )
-}
-
-function CostBox({ label, value, accent, icon: Icon }) {
-  const styles = {
-    danger:  'border-danger/30 bg-danger/10',
-    success: 'border-success/30 bg-success/10',
-  }
-  const textStyles = { danger: 'text-danger', success: 'text-success' }
-  return (
-    <div className={`rounded-xl border p-3 ${styles[accent]}`}>
-      <div className="flex items-center gap-1 mb-2">
-        <Icon size={11} className={textStyles[accent]} />
-        <span className="text-[10px] text-muted font-semibold uppercase tracking-widest">{label}</span>
-      </div>
-      <div className={`text-xl font-black ${textStyles[accent]}`}>
-        ₹{(value ?? 0).toLocaleString('en-IN')}
-      </div>
+      <span className={`${strong ? 'font-bold text-lg' : 'font-semibold'} ${highlight ? 'text-warning' : 'text-slate-800'}`}>
+        {value}
+      </span>
     </div>
   )
 }
