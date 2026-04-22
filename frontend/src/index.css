@@ -84,4 +84,24 @@
     transition: transform 0.1s;
   }
   input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+  /* ── Weather shimmer (banner gradient animation) ── */
+  @keyframes shimmer {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+
+  /* ── Ping (dot pulsing used in weather components) ── */
+  @keyframes ping {
+    75%, 100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+
+  /* ── Pulse (used for weather icons) ── */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.5; }
+  }
 }

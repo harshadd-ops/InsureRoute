@@ -5,60 +5,6 @@ const BASE = 'http://localhost:8000'
 // ── API client ──────────────────────────────────────────────────────────────
 const client = axios.create({ baseURL: BASE, timeout: 5000 })
 
-// ── Mock data factory (used when API is unavailable) ────────────────────────
-export function makeMockData(injected = false) {
-  const risk    = injected ? 72 + Math.random() * 20 : 25 + Math.random() * 40
-  const prob    = risk / 100
-  const cargo   = 70000
-  const before  = Math.round(cargo * prob * 0.08 * (injected ? 1.4 : 1.1) * 1.6)
-  const after   = Math.round(before * 0.35)
-  const savings = Math.round(before - after)
-  const savPct  = Math.round((savings / before) * 100)
-
-  const PATH_NORMAL    = ['Pune_Hub', 'Nashik_Hub', 'Mumbai_Hub']
-  const PATH_REROUTED  = ['Pune_Hub', 'Nashik_Hub', 'Surat_Hub', 'Navi Mumbai', 'Mumbai_Hub']
-  const path = injected ? PATH_REROUTED : PATH_NORMAL
-
-  return {
-    kpis: {
-      sla:                +(8 + Math.random() * 5).toFixed(1),
-      delay:              +(7 + Math.random() * 6).toFixed(1),
-      risk:               +risk.toFixed(1),
-      savings:            savPct,
-      total_disruptions:  2342,
-      total_shipments:    30000,
-    },
-    insurance: {
-      cargo_value:            cargo,
-      disruption_probability: +prob.toFixed(4),
-      base_premium:           Math.round(cargo * prob * 0.08),
-      before_cost:            before,
-      after_cost:             after,
-      savings:                savings,
-      savings_pct:            savPct,
-      weather_multiplier:     1.4,
-      perishable_multiplier:  1.6,
-    },
-    route: {
-      path,
-      disruption_detected: injected,
-      origin:      'Pune_Hub',
-      destination: 'Mumbai_Hub',
-      total_time_hrs:   injected ? 9.2 : 4.1,
-      total_distance_km: injected ? 487 : 149,
-      total_cost_inr:    injected ? 12400 : 5800,
-      hops:              path.length - 1,
-      rerouted:          injected,
-    },
-    anomaly_score: injected ? -(0.2 + Math.random() * 0.3) : -(0.05 + Math.random() * 0.1),
-    flags:  { monsoon: true, perishable: true, injected },
-    raw:    { delay_ratio: injected ? 2.8 + Math.random() : 1.05 + Math.random() * 0.1,
-              weather_severity: injected ? 0.8 : 0.2 },
-    nodes: MOCK_NODES,
-    edges: MOCK_EDGES,
-  }
-}
-
 // ── Network nodes (Indian supply chain hubs, lon/lat) ─────────────────────
 export const MOCK_NODES = [
   { id: 'Delhi_Hub',          label: 'Delhi Hub',         lon: 77.1, lat: 28.7 },
@@ -83,19 +29,141 @@ export const MOCK_NODES = [
   { id: 'Kochi_Hub',          label: 'Kochi Hub',         lon: 76.3, lat: 10.0 },
 ]
 
+// ── Edge graph (bidirectional hub connections) ─────────────────────────────
 const EDGE_PAIRS = [
-  ['Pune_Hub','Mumbai_Hub'],['Pune_Hub','Nashik_Hub'],['Nashik_Hub','Mumbai_Hub'],
-  ['Nashik_Hub','Surat_Hub'],['Surat_Hub','Navi_Mumbai_DC'],['Navi_Mumbai_DC','Mumbai_Hub'],
-  ['Mumbai_Hub','Ahmedabad_Hub'],['Delhi_Hub','Jaipur_Hub'],['Jaipur_Hub','Ahmedabad_Hub'],
-  ['Delhi_Hub','Lucknow_Hub'],['Lucknow_Hub','Patna_Hub'],['Kolkata_Hub','Patna_Hub'],
-  ['Chennai_Hub','Bangalore_Hub'],['Bangalore_Hub','Hyderabad_Hub'],
-  ['Hyderabad_Hub','Visakhapatnam_Hub'],['Coimbatore_Hub','Chennai_Hub'],
-  ['Kochi_Hub','Coimbatore_Hub'],['Nagpur_Hub','Hyderabad_Hub'],
-  ['Nagpur_Hub','Bhopal_Hub'],['Bhopal_Hub','Indore_Hub'],
-  ['Indore_Hub','Ahmedabad_Hub'],['Mumbai_Hub','Pune_Hub'],
+  ['Pune_Hub',       'Mumbai_Hub'],
+  ['Pune_Hub',       'Nashik_Hub'],
+  ['Nashik_Hub',     'Mumbai_Hub'],
+  ['Nashik_Hub',     'Surat_Hub'],
+  ['Surat_Hub',      'Navi_Mumbai_DC'],
+  ['Navi_Mumbai_DC', 'Mumbai_Hub'],
+  ['Mumbai_Hub',     'Ahmedabad_Hub'],
+  ['Ahmedabad_Hub',  'Surat_Hub'],
+  ['Ahmedabad_Hub',  'Jaipur_Hub'],
+  ['Ahmedabad_Hub',  'Indore_Hub'],
+  ['Delhi_Hub',      'Jaipur_Hub'],
+  ['Delhi_Hub',      'Lucknow_Hub'],
+  ['Delhi_Hub',      'Bhopal_Hub'],
+  ['Lucknow_Hub',    'Patna_Hub'],
+  ['Lucknow_Hub',    'Bhopal_Hub'],
+  ['Kolkata_Hub',    'Patna_Hub'],
+  ['Kolkata_Hub',    'Visakhapatnam_Hub'],
+  ['Chennai_Hub',    'Bangalore_Hub'],
+  ['Chennai_Hub',    'Visakhapatnam_Hub'],
+  ['Bangalore_Hub',  'Hyderabad_Hub'],
+  ['Bangalore_Hub',  'Kochi_Hub'],
+  ['Bangalore_Hub',  'Coimbatore_Hub'],
+  ['Hyderabad_Hub',  'Visakhapatnam_Hub'],
+  ['Hyderabad_Hub',  'Nagpur_Hub'],
+  ['Hyderabad_Hub',  'Chennai_Hub'],
+  ['Coimbatore_Hub', 'Chennai_Hub'],
+  ['Kochi_Hub',      'Coimbatore_Hub'],
+  ['Nagpur_Hub',     'Hyderabad_Hub'],
+  ['Nagpur_Hub',     'Bhopal_Hub'],
+  ['Nagpur_Hub',     'Kolkata_Hub'],
+  ['Bhopal_Hub',     'Indore_Hub'],
+  ['Indore_Hub',     'Ahmedabad_Hub'],
+  ['Pune_Hub',       'Bangalore_Hub'],
+  ['Pune_Hub',       'Hyderabad_Hub'],
+  ['Mumbai_Hub',     'Pune_Hub'],
 ]
 
 export const MOCK_EDGES = EDGE_PAIRS.map(([s, t]) => ({ source: s, target: t }))
+
+// ── BFS: shortest path between two nodes in the hub graph ─────────────────
+function bfsPath(origin, destination, edgePairs) {
+  if (origin === destination) return [origin]
+  const adj = {}
+  edgePairs.forEach(([a, b]) => {
+    if (!adj[a]) adj[a] = []
+    if (!adj[b]) adj[b] = []
+    adj[a].push(b)
+    adj[b].push(a)
+  })
+  const queue = [[origin]]
+  const visited = new Set([origin])
+  while (queue.length) {
+    const path = queue.shift()
+    const node = path[path.length - 1]
+    for (const next of (adj[node] || [])) {
+      if (visited.has(next)) continue
+      const newPath = [...path, next]
+      if (next === destination) return newPath
+      visited.add(next)
+      queue.push(newPath)
+    }
+  }
+  return [origin, destination] // fallback: direct
+}
+
+// ── Mock data factory (used when API is unavailable) ──────────────────────
+export function makeMockData(injected = false, params = {}) {
+  const origin      = params.origin      || 'Pune_Hub'
+  const destination = params.destination || 'Mumbai_Hub'
+
+  const risk   = injected ? 72 + Math.random() * 20 : 25 + Math.random() * 40
+  const prob   = risk / 100
+  const cargo  = params.cargoValue || 70000
+  const before = Math.round(cargo * prob * 0.08 * (injected ? 1.4 : 1.1) * 1.6)
+  const after  = Math.round(before * 0.35)
+  const savings = Math.round(before - after)
+  const savPct  = Math.round((savings / before) * 100)
+
+  // Normal path via BFS
+  const normalPath = bfsPath(origin, destination, EDGE_PAIRS)
+
+  // Rerouted path: remove direct origin→destination edge and find alternate
+  const altEdges    = EDGE_PAIRS.filter(([a, b]) =>
+    !(a === origin && b === destination) && !(b === origin && a === destination)
+  )
+  const reroutePath = injected ? bfsPath(origin, destination, altEdges) : normalPath
+  const path        = injected ? reroutePath : normalPath
+
+  // Estimates: ~150 km per hop, ~60 km/h
+  const routeKm  = (path.length - 1) * 150
+  const routeHrs = +(routeKm / 60).toFixed(1)
+
+  return {
+    kpis: {
+      sla:               +(8 + Math.random() * 5).toFixed(1),
+      delay:             +(7 + Math.random() * 6).toFixed(1),
+      risk:              +risk.toFixed(1),
+      savings:           savPct,
+      total_disruptions: 2342,
+      total_shipments:   30000,
+    },
+    insurance: {
+      cargo_value:            cargo,
+      disruption_probability: +prob.toFixed(4),
+      base_premium:           Math.round(cargo * prob * 0.08),
+      before_cost:            before,
+      after_cost:             after,
+      savings,
+      savings_pct:            savPct,
+      weather_multiplier:     params.weatherMult ?? 1.4,
+      perishable_multiplier:  params.perishMult  ?? 1.6,
+    },
+    route: {
+      path,
+      disruption_detected: injected,
+      origin,
+      destination,
+      total_time_hrs:    routeHrs,
+      total_distance_km: routeKm,
+      total_cost_inr:    Math.round(routeKm * 40),
+      hops:              path.length - 1,
+      rerouted:          injected,
+    },
+    anomaly_score: injected ? -(0.2 + Math.random() * 0.3) : -(0.05 + Math.random() * 0.1),
+    flags: { monsoon: params.monsoon ?? true, perishable: params.perishable ?? true, injected },
+    raw:   {
+      delay_ratio:      injected ? 2.8 + Math.random() : 1.05 + Math.random() * 0.1,
+      weather_severity: injected ? 0.8 : 0.2,
+    },
+    nodes: MOCK_NODES,
+    edges: MOCK_EDGES,
+  }
+}
 
 // ── API calls ────────────────────────────────────────────────────────────────
 export async function fetchData(params = {}) {
@@ -103,22 +171,38 @@ export async function fetchData(params = {}) {
     const res = await client.get('/data', { params })
     return { data: res.data, mock: false }
   } catch {
-    return { data: makeMockData(false), mock: true }
+    return { data: makeMockData(false, params), mock: true }
   }
 }
 
 export async function injectDisruption(params = {}) {
   try {
     const res = await client.post('/inject-disruption', {
-      origin:      params.origin      || 'Pune_Hub',
-      destination: params.destination || 'Mumbai_Hub',
-      cargo_value: params.cargoValue  || 70000,
-      monsoon:     params.monsoon     ?? true,
-      perishable:  params.perishable  ?? true,
-      anomaly_threshold: params.threshold ?? -0.15,
+      origin:            params.origin      || 'Pune_Hub',
+      destination:       params.destination || 'Mumbai_Hub',
+      cargo_value:       params.cargoValue  || 70000,
+      monsoon:           params.monsoon     ?? true,
+      perishable:        params.perishable  ?? true,
+      anomaly_threshold: params.threshold   ?? -0.15,
     })
     return { data: res.data, mock: false }
   } catch {
-    return { data: makeMockData(true), mock: true }
+    return { data: makeMockData(true, params), mock: true }
+  }
+}
+
+export async function fetchNews() {
+  try {
+    const res = await client.get('/route-news')
+    return { data: res.data, mock: false }
+  } catch (error) {
+    return {
+      data: {
+        available: false,
+        briefs: ['Intelligence feed offline.'],
+        cached: false,
+      },
+      mock: true
+    }
   }
 }

@@ -31,14 +31,40 @@ def build_graph(seed: int = 42) -> nx.DiGraph:
     rng = random.Random(seed)
     G = nx.DiGraph()
     G.add_nodes_from(HUBS)
+    
+    import math
+    def haversine(lon1, lat1, lon2, lat2):
+        R = 6371  # radius of Earth in km
+        phi1 = math.radians(lat1)
+        phi2 = math.radians(lat2)
+        delta_phi = math.radians(lat2 - lat1)
+        delta_lambda = math.radians(lon2 - lon1)
+        a = math.sin(delta_phi/2)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda/2)**2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+        return R * c
 
-    # Connect every hub to 4–7 nearest (simulated) neighbours
+    positions = get_node_positions()
+
+    # Connect every hub to 4–7 nearest neighbours based on actual geography
     for i, src in enumerate(HUBS):
+        src_pos = positions[src]
+        
+        # Calculate distances to all other hubs
+        distances = []
+        for dst in HUBS:
+            if src != dst:
+                dst_pos = positions[dst]
+                dist = haversine(src_pos[0], src_pos[1], dst_pos[0], dst_pos[1])
+                distances.append((dist, dst))
+                
+        # Sort by distance to find nearest neighbours
+        distances.sort(key=lambda x: x[0])
+        
         n_edges = rng.randint(4, 7)
-        candidates = [h for h in HUBS if h != src]
-        targets = rng.sample(candidates, min(n_edges, len(candidates)))
-        for dst in targets:
-            dist = rng.randint(100, 2500)          # km
+        targets = distances[:n_edges]
+        
+        for dist, dst in targets:
+            dist = max(10, int(dist)) # avoid 0 distance
             time = round(dist / rng.uniform(40, 80), 1)   # hrs
             cost = round(dist * rng.uniform(15, 35), 0)   # ₹
             G.add_edge(src, dst, distance=dist, time=time, cost=cost, weight=time)
