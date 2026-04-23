@@ -78,7 +78,7 @@ export default function KPICards({ kpis }) {
   if (!kpis) return null
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="flex flex-col gap-3 md:gap-4 h-full">
       {CARDS.map((card, i) => {
         const value = kpis[card.key] ?? 0
         const level = card.threshold(value)
@@ -90,7 +90,7 @@ export default function KPICards({ kpis }) {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05, duration: 0.4 }}
-            className={`glass p-5 flex flex-col gap-2 rounded-xl border-t-2 ${card.accent}`}
+            className={`glass p-4 md:p-5 flex flex-col justify-center border-t-2 ${card.accent} flex-1 min-h-[100px]`}
           >
             <div className="flex items-center gap-2 mb-1">
               <Icon size={16} className={card.iconColor} />
@@ -99,7 +99,7 @@ export default function KPICards({ kpis }) {
               </span>
             </div>
             
-            <div className={`text-4xl font-black tracking-tight ${LEVEL_STYLES[level]}`}>
+            <div className={`text-3xl md:text-4xl font-black tracking-tight ${LEVEL_STYLES[level]}`}>
               <AnimatedNumber
                 value={value}
                 prefix={card.prefix || ''}

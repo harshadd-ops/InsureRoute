@@ -231,17 +231,24 @@ export default function Dashboard() {
           )}
         </AnimatePresence>
 
-        {/* ── KPI row ── */}
-        <KPICards kpis={kpis} />
+        {/* ── Main Three-Column Grid (KPIs, Map, Insurance) ── */}
+        <div className="grid grid-cols-1 md:grid-cols-10 lg:grid-cols-5 gap-4 lg:gap-5 md:h-[700px] lg:h-[calc(100vh-170px)] lg:min-h-[600px] overflow-hidden">
+          
+          {/* Left Column (20% Desktop, 30% Tablet) - KPI Cards */}
+          <div className="md:col-span-3 lg:col-span-1 flex flex-col gap-3 overflow-y-auto no-scrollbar h-full">
+            <KPICards kpis={kpis} />
+          </div>
 
-        {/* ── Main grid: Graph + Insurance ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5 items-stretch h-[600px] max-h-[600px] overflow-hidden">
-          <div className="flex flex-col rounded-xl overflow-hidden h-full min-h-0">
+          {/* Center Column (60% Desktop, 70% Tablet) - Map */}
+          <div className="md:col-span-7 lg:col-span-3 md:row-span-2 lg:row-span-1 flex flex-col rounded-xl overflow-hidden h-[450px] md:h-full min-h-0 order-first md:order-none">
             <GraphView nodes={nodes} edges={edges} route={route} params={params} setParams={setParams} />
           </div>
-          <div className="flex flex-col h-full min-h-0">
+
+          {/* Right Column (20% Desktop, 30% Tablet) - Insurance Panel */}
+          <div className="md:col-span-3 lg:col-span-1 flex flex-col h-full min-h-0 overflow-y-auto no-scrollbar">
             <InsurancePanel insurance={ins} disrupted={disrupted} />
           </div>
+
         </div>
 
         {/* ── Route Timeline ── */}

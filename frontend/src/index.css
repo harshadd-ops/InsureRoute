@@ -104,4 +104,32 @@
     0%, 100% { opacity: 1; }
     50%       { opacity: 0.5; }
   }
+
+  /* ── Leaflet Overrides ── */
+  .leaflet-container {
+    background-color: transparent !important;
+    font-family: 'Inter', system-ui, sans-serif !important;
+  }
+  .esri-base-layer {
+    filter: brightness(0.88) contrast(1.06) saturate(0.92);
+  }
+  .custom-hub-tooltip {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-size: 9px;
+    font-weight: 700;
+    color: #e0f2fe; /* base color, matches original */
+    text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.8);
+    padding: 0;
+  }
+  .custom-hub-tooltip::before {
+    display: none !important;
+  }
+  .glow-node {
+    filter: url(#node-glow);
+  }
+  .glow-route-line {
+    filter: url(#glow-route-line);
+  }
 }

@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion'
-import { useMemo, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useMemo, useEffect, useRef, useState } from 'react'
 import { AlertTriangle, Minus, Plus, RotateCcw } from 'lucide-react'
 import { fetchRoadGeometry } from '../services/routeGeometry'
+import { MapContainer, TileLayer, Polyline, CircleMarker, Tooltip, useMap } from 'react-leaflet'
+import 'leaflet/dist/leaflet.css'
 
 // ── Node coordinates (real Indian hub lat/lon) ────────────────────────────
 const NODE_MAP = {
@@ -82,38 +84,78 @@ const EDGE_PAIRS = [
   ['Visakhapatnam_Hub', 'Hyderabad_Hub'],
 ]
 
-// ── Map projection helpers (Mercator) ─────────────────────────────────────
-// We project lon/lat into a 0-100% SVG viewport centered on India
-const MAP_BOUNDS = { minLon: 66, maxLon: 100, minLat: 6, maxLat: 38 }
+// ── Leaflet Controls ────────────────────────────────────────────────────────
+function MapController({ routePath, activeCoords }) {
+  const map = useMap()
+  
+  useEffect(() => {
+    if (activeCoords && activeCoords.length > 0) {
+      const lats = activeCoords.map(c => c[1])
+      const lons = activeCoords.map(c => c[0])
+      const bounds = [
+        [Math.min(...lats) - 0.5, Math.min(...lons) - 0.5],
+        [Math.max(...lats) + 0.5, Math.max(...lons) + 0.5]
+      ]
+      map.flyToBounds(bounds, { duration: 1.5, padding: [20, 20], maxZoom: 12 })
+    }
+  }, [routePath?.join('|'), activeCoords])
 
-function project(lon, lat, w, h) {
-  // Web Mercator Y projection
-  const latRad = (lat * Math.PI) / 180
-  const minLatRad = (MAP_BOUNDS.minLat * Math.PI) / 180
-  const maxLatRad = (MAP_BOUNDS.maxLat * Math.PI) / 180
-  const mercY  = Math.log(Math.tan(Math.PI / 4 + latRad / 2))
-  const mercMin = Math.log(Math.tan(Math.PI / 4 + minLatRad / 2))
-  const mercMax = Math.log(Math.tan(Math.PI / 4 + maxLatRad / 2))
+  return null
+}
+
+function CustomZoomControl() {
+  const map = useMap()
+  const [z, setZ] = useState(map.getZoom())
   
-  // Fractions relative to the map bounding box
-  const xFrac = (lon - MAP_BOUNDS.minLon) / (MAP_BOUNDS.maxLon - MAP_BOUNDS.minLon)
-  const yFrac = 1 - ((mercY - mercMin) / (mercMax - mercMin))
-  
-  // Simulate CSS object-fit: cover for the native ESRI image size
-  const imgW = 1000
-  const imgH = 1010
-  const scale = Math.min(w / imgW, h / imgH)
-  const renderW = imgW * scale
-  const renderH = imgH * scale
-  
-  // Object-position defaults to 50% 50% (centered)
-  const offsetX = (w - renderW) / 2
-  const offsetY = (h - renderH) / 2
-  
-  const x = (xFrac * renderW) + offsetX
-  const y = (yFrac * renderH) + offsetY
-  
-  return { x, y }
+  useEffect(() => {
+    const onZoom = () => setZ(map.getZoom())
+    map.on('zoomend', onZoom)
+    return () => map.off('zoomend', onZoom)
+  }, [map])
+
+  return (
+    <div
+      data-map-control
+      className="absolute left-2 top-1/2 z-[1000] flex -translate-y-1/2 flex-col gap-1 rounded-lg border border-slate-600/80 bg-slate-900/90 p-1 shadow-lg"
+    >
+      <div
+        className="mb-0.5 rounded px-1.5 py-0.5 text-center text-[8px] font-bold uppercase tracking-wider text-emerald-400"
+        style={{ borderBottom: '1px solid rgba(52,211,153,0.25)' }}
+      >
+        Satellite
+      </div>
+      <button
+        type="button"
+        title="Zoom in"
+        className="flex h-8 w-8 items-center justify-center rounded-md text-slate-200 hover:bg-slate-700"
+        onClick={() => map.zoomIn()}
+      >
+        <Plus size={16} />
+      </button>
+      <button
+        type="button"
+        title="Zoom out"
+        className="flex h-8 w-8 items-center justify-center rounded-md text-slate-200 hover:bg-slate-700"
+        onClick={() => map.zoomOut()}
+      >
+        <Minus size={16} />
+      </button>
+      <button
+        type="button"
+        title="Reset zoom & pan"
+        className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 hover:bg-slate-700 hover:text-slate-200"
+        onClick={() => map.setView([22.0, 79.0], 5)}
+      >
+        <RotateCcw size={14} />
+      </button>
+      <div className="px-1 pb-0.5 text-center font-mono text-[9px] text-slate-500">
+        {Math.round((z / 18) * 100)}%
+      </div>
+      <div className="max-w-[4.5rem] px-0.5 pb-1 text-center text-[7px] leading-snug text-slate-500">
+        Scroll wheel zoom · drag map to pan
+      </div>
+    </div>
+  )
 }
 
 function buildVariantExplanation(selected, best) {
@@ -192,22 +234,6 @@ function CustomDropdown({ value, options, onChange }) {
 }
 
 export default function GraphView({ nodes = [], edges = [], route = null, params, setParams }) {
-  const containerRef = useRef(null)
-  const [dims, setDims] = useState({ w: 800, h: 400 })
-
-  useEffect(() => {
-    const obs = new ResizeObserver(entries => {
-      for (const e of entries) {
-        const { width, height } = e.contentRect
-        if (width > 0 && height > 0) setDims({ w: width, h: height })
-      }
-    })
-    if (containerRef.current) obs.observe(containerRef.current)
-    return () => obs.disconnect()
-  }, [])
-
-  const { w, h } = dims
-
   // All hubs on the map: API nodes (full graph) + NODE_MAP labels + any id on active route.path
   const allNodes = useMemo(() => {
     const fromApi = new Map(nodes.map(n => [n.id, n]))
@@ -241,14 +267,7 @@ export default function GraphView({ nodes = [], edges = [], route = null, params
   const [selectedVariantId, setSelectedVariantId] = useState('best')
   const [lineMode, setLineMode] = useState('idle') // 'road' | 'fallback' | 'idle'
   const [lineMessage, setLineMessage] = useState(null)
-  const routePolyRef = useRef(null)
   const fetchAbortRef = useRef(null)
-
-  const [zoom, setZoom] = useState(1)
-  const [pan, setPan] = useState({ x: 0, y: 0 })
-  const [isDragging, setIsDragging] = useState(false)
-  const dragRef = useRef({ active: false, sx: 0, sy: 0, px: 0, py: 0 })
-  const mapLayerRef = useRef(null)
 
   const bestVariant = useMemo(
     () => routeVariants.find(v => v.is_best) || routeVariants[0] || null,
@@ -261,22 +280,7 @@ export default function GraphView({ nodes = [], edges = [], route = null, params
 
   const activeCoords = useMemo(() => {
     const coords = selectedVariant?.coordinates
-    return Array.isArray(coords) ? coords : []
-  }, [selectedVariant])
-
-  // Projected positions
-  const projected = useMemo(() => {
-    const m = {}
-    allNodes.forEach(n => {
-      m[n.id] = project(n.lon, n.lat, w, h)
-    })
-    return m
-  }, [allNodes, w, h])
-
-  // Use all EDGE_PAIRS for background network only
-  const allEdges = useMemo(() => EDGE_PAIRS.map(([s, t]) => ({ source: s, target: t })), [])
-
-  // Fetch road geometry (ORS) whenever the ordered path changes; re-project on resize only
+  // Fetch road geometry (ORS) whenever the ordered path changes
   useEffect(() => {
     const path = route?.path
     if (!path || path.length < 2) {
@@ -325,16 +329,7 @@ export default function GraphView({ nodes = [], edges = [], route = null, params
             })
             .filter(Boolean)
           if (ll.length >= 2) {
-            setRouteVariants([
-              {
-                id: 'best',
-                label: 'Hub connector',
-                coordinates: ll,
-                duration_sec: 0,
-                distance_m: 0,
-                is_best: true,
-              },
-            ])
+            setRouteVariants([{ id: 'best', label: 'Hub connector', coordinates: ll, duration_sec: 0, distance_m: 0, is_best: true }])
             setSelectedVariantId('best')
             setLineMode('fallback')
             setLineMessage(res.message || 'WARNING: Optimized route unavailable (API missing)')
@@ -358,16 +353,7 @@ export default function GraphView({ nodes = [], edges = [], route = null, params
           })
           .filter(Boolean)
         if (ll.length >= 2) {
-          setRouteVariants([
-            {
-              id: 'best',
-              label: 'Hub connector',
-              coordinates: ll,
-              duration_sec: 0,
-              distance_m: 0,
-              is_best: true,
-            },
-          ])
+          setRouteVariants([{ id: 'best', label: 'Hub connector', coordinates: ll, duration_sec: 0, distance_m: 0, is_best: true }])
           setSelectedVariantId('best')
           setLineMode('fallback')
           setLineMessage('WARNING: Optimized route unavailable')
@@ -383,85 +369,6 @@ export default function GraphView({ nodes = [], edges = [], route = null, params
       ac.abort()
     }
   }, [route?.path, nodes])
-
-  const projectedRouteLine = useMemo(() => {
-    if (!activeCoords.length) return []
-    return activeCoords
-      .map(([lon, lat]) => {
-        if (typeof lon !== 'number' || typeof lat !== 'number' || Number.isNaN(lon) || Number.isNaN(lat))
-          return null
-        return project(lon, lat, w, h)
-      })
-      .filter(Boolean)
-  }, [activeCoords, w, h])
-
-  useLayoutEffect(() => {
-    const el = routePolyRef.current
-    if (!el || lineMode !== 'road' || projectedRouteLine.length < 2) return
-    try {
-      const len = el.getTotalLength()
-      if (!len || !Number.isFinite(len)) return
-      el.style.strokeDasharray = `${len}`
-      el.style.strokeDashoffset = `${len}`
-      el.style.transition = 'none'
-      requestAnimationFrame(() => {
-        el.style.transition = 'stroke-dashoffset 2.1s cubic-bezier(0.4, 0, 0.2, 1)'
-        el.style.strokeDashoffset = '0'
-      })
-    } catch {
-      /* ignore */
-    }
-  }, [projectedRouteLine, lineMode, route?.path, selectedVariantId])
-
-  useEffect(() => {
-    setZoom(1)
-    setPan({ x: 0, y: 0 })
-    dragRef.current.active = false
-    setIsDragging(false)
-  }, [route?.path?.join('|')])
-
-  useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-    const onWheel = (e) => {
-      e.preventDefault()
-      const step = e.deltaY > 0 ? -0.09 : 0.09
-      setZoom(z => Math.min(2.85, Math.max(0.55, Math.round((z + step) * 1000) / 1000)))
-    }
-    el.addEventListener('wheel', onWheel, { passive: false })
-    return () => el.removeEventListener('wheel', onWheel)
-  }, [])
-
-  function onMapPointerDown(e) {
-    if (e.pointerType === 'mouse' && e.button !== 0) return
-    dragRef.current.active = true
-    dragRef.current.sx = e.clientX
-    dragRef.current.sy = e.clientY
-    dragRef.current.px = pan.x
-    dragRef.current.py = pan.y
-    setIsDragging(true)
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId)
-    } catch {
-      /* ignore */
-    }
-  }
-  function onMapPointerMove(e) {
-    if (!dragRef.current.active) return
-    setPan({
-      x: dragRef.current.px + (e.clientX - dragRef.current.sx),
-      y: dragRef.current.py + (e.clientY - dragRef.current.sy),
-    })
-  }
-  function onMapPointerUp(e) {
-    dragRef.current.active = false
-    setIsDragging(false)
-    try {
-      e.currentTarget.releasePointerCapture(e.pointerId)
-    } catch {
-      /* ignore */
-    }
-  }
 
   function nodeColor(id) {
     if (id === params?.origin)      return '#f0f9ff'
@@ -491,65 +398,12 @@ export default function GraphView({ nodes = [], edges = [], route = null, params
 
       {/* Map Area */}
       <div
-        ref={containerRef}
         className="relative flex-1 w-full rounded-xl overflow-hidden bg-slate-950"
         style={{ minHeight: 300 }}
       >
-        {/* Zoomable / pannable map stack (image + overlays + graph stay aligned) */}
-        <div
-          ref={mapLayerRef}
-          className="absolute inset-0 select-none touch-none"
-          style={{
-            transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-            transformOrigin: '50% 50%',
-            cursor: isDragging ? 'grabbing' : 'grab',
-            zIndex: 1,
-          }}
-          onPointerDown={onMapPointerDown}
-          onPointerMove={onMapPointerMove}
-          onPointerUp={onMapPointerUp}
-          onPointerCancel={onMapPointerUp}
-        >
-          {/* ESRI World Imagery — brighter for readability */}
-          <img
-            src="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=66%2C6%2C100%2C38&bboxSR=4326&layers=&layerDefs=&size=1000%2C1010&format=jpg&transparent=false&dpi=96&time=&layerTimeOptions=&dynamicLayers=&gdbVersion=&mapScale=&rotation=&datumTransformations=&mapRangeValues=&layerRangeValues=&clipping=&spatialFilter=&f=image"
-            alt="satellite"
-            className="absolute inset-0 w-full h-full object-contain pointer-events-none"
-            style={{
-              filter: 'brightness(0.88) contrast(1.06) saturate(0.92)',
-              userSelect: 'none',
-            }}
-            draggable={false}
-          />
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: 'linear-gradient(135deg, rgba(2,8,23,0.14) 0%, rgba(15,23,42,0.1) 50%, rgba(2,6,23,0.12) 100%)',
-            }}
-          />
-
-          <svg
-            className="absolute inset-0 w-full h-full pointer-events-none"
-            style={{ opacity: 0.06 }}
-          >
-            {[...Array(8)].map((_, i) => (
-              <line key={`v${i}`} x1={`${(i + 1) * 12.5}%`} y1="0" x2={`${(i + 1) * 12.5}%`} y2="100%" stroke="#bae6fd" strokeWidth="0.5" />
-            ))}
-            {[...Array(5)].map((_, i) => (
-              <line key={`h${i}`} x1="0" y1={`${(i + 1) * 16.6}%`} x2="100%" y2={`${(i + 1) * 16.6}%`} stroke="#bae6fd" strokeWidth="0.5" />
-            ))}
-          </svg>
-
-          <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 2 }}>
+        {/* Invisible SVG for definitions (glows, gradients) so Leaflet can use them */}
+        <svg style={{ position: 'absolute', width: 0, height: 0 }}>
           <defs>
-            <filter id="glow-yellow">
-              <feGaussianBlur stdDeviation="3" result="blur" />
-              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-            </filter>
-            <filter id="glow-red">
-              <feGaussianBlur stdDeviation="4" result="blur" />
-              <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-            </filter>
             <filter id="node-glow">
               <feGaussianBlur stdDeviation="2.5" result="blur" />
               <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
@@ -563,151 +417,135 @@ export default function GraphView({ nodes = [], edges = [], route = null, params
               <stop offset="50%" stopColor={disrupted ? '#f87171' : '#fbbf24'} />
               <stop offset="100%" stopColor={disrupted ? '#ef4444' : '#fb923c'} />
             </linearGradient>
-            <marker id="arrowhead" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
-              <polygon points="0 0, 6 2, 0 4" fill="#fbbf24" opacity="0.8" />
-            </marker>
-            <marker id="arrowhead-red" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
-              <polygon points="0 0, 6 2, 0 4" fill="#f87171" opacity="0.8" />
-            </marker>
           </defs>
+        </svg>
 
-          {/* Background network edges — greyed out, never highlighted */}
+        <MapContainer 
+          center={[22.0, 79.0]} 
+          zoom={5} 
+          zoomControl={false}
+          scrollWheelZoom={true}
+          style={{ width: '100%', height: '100%', background: '#020817', zIndex: 0 }}
+          attributionControl={false}
+        >
+          <MapController routePath={route?.path} activeCoords={activeCoords} />
+          
+          <TileLayer
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            className="esri-base-layer"
+          />
+
+          {/* Dark Overlay Layer */}
+          <div
+            className="leaflet-overlay-pane pointer-events-none"
+            style={{
+              position: 'absolute', inset: 0, zIndex: 300,
+              background: 'linear-gradient(135deg, rgba(2,8,23,0.14) 0%, rgba(15,23,42,0.1) 50%, rgba(2,6,23,0.12) 100%)',
+            }}
+          />
+
+          {/* Grid Lines (CSS grid overlay since map is dynamic) */}
+          <div className="absolute inset-0 w-full h-full pointer-events-none z-[350]" style={{ opacity: 0.06 }}>
+            <svg className="w-full h-full">
+              {[...Array(8)].map((_, i) => (
+                <line key={`v${i}`} x1={`${(i + 1) * 12.5}%`} y1="0" x2={`${(i + 1) * 12.5}%`} y2="100%" stroke="#bae6fd" strokeWidth="0.5" />
+              ))}
+              {[...Array(5)].map((_, i) => (
+                <line key={`h${i}`} x1="0" y1={`${(i + 1) * 16.6}%`} x2="100%" y2={`${(i + 1) * 16.6}%`} stroke="#bae6fd" strokeWidth="0.5" />
+              ))}
+            </svg>
+          </div>
+
+          {/* Background network edges */}
           {allEdges.map((e, i) => {
-            const s = projected[e.source]
-            const t = projected[e.target]
+            const s = nodesById[e.source]
+            const t = nodesById[e.target]
             if (!s || !t) return null
             return (
-              <line
+              <Polyline
                 key={i}
-                x1={s.x} y1={s.y}
-                x2={t.x} y2={t.y}
-                stroke="rgba(148,163,184,0.25)"
-                strokeWidth={0.8}
-                strokeLinecap="round"
-                opacity={0.5}
+                positions={[[s.lat, s.lon], [t.lat, t.lon]]}
+                pathOptions={{
+                  color: 'rgba(148,163,184,0.25)',
+                  weight: 1.5,
+                  opacity: 0.5,
+                  lineCap: 'round'
+                }}
               />
             )
           })}
 
-          {/* Active route — continuous road polyline (ORS) or dashed hub-to-hub fallback */}
-          {projectedRouteLine.length >= 2 && (
-            <polyline
+          {/* Active Route */}
+          {activeCoords.length >= 2 && (
+            <Polyline
               key={`${(route?.path ?? []).join('|')}#${selectedVariantId}`}
-              ref={routePolyRef}
-              points={projectedRouteLine.map(p => `${p.x},${p.y}`).join(' ')}
-              fill="none"
-              stroke={
-                lineMode === 'road'
+              positions={activeCoords.map(c => [c[1], c[0]])}
+              pathOptions={{
+                color: lineMode === 'road'
                   ? (selectedVariantId !== 'best' ? '#c4b5fd' : 'url(#route-risk-gradient)')
-                  : '#888888'
-              }
-              strokeWidth={lineMode === 'road' ? 3.4 : 2.2}
-              strokeLinejoin="round"
-              strokeLinecap="round"
-              strokeDasharray={lineMode === 'road' ? undefined : '6 6'}
-              filter={lineMode === 'road' ? 'url(#glow-route-line)' : undefined}
-              opacity={0.95}
+                  : '#888888',
+                weight: lineMode === 'road' ? 3.4 : 2.2,
+                dashArray: lineMode === 'road' ? undefined : '6, 6',
+                className: lineMode === 'road' ? 'glow-route-line' : '',
+                opacity: 0.95
+              }}
             />
           )}
 
           {/* Nodes */}
           {allNodes.map(n => {
-            const pos = projected[n.id]
-            if (!pos) return null
             const isKey = routeNodeSet.has(n.id)
             const isOrigin = n.id === params?.origin
             const isDest   = n.id === params?.destination
             const r = isOrigin || isDest ? 7 : isKey ? 5.5 : 3
             const color = nodeColor(n.id)
+            
             return (
-              <g key={n.id} style={{ cursor: 'default' }}>
+              <CircleMarker
+                key={n.id}
+                center={[n.lat, n.lon]}
+                radius={r}
+                pathOptions={{
+                  fillColor: color,
+                  fillOpacity: 1,
+                  color: isKey ? '#fff' : 'rgba(255,255,255,0.2)',
+                  weight: isKey ? 1.5 : 0.5,
+                  className: isKey ? 'glow-node' : ''
+                }}
+              >
                 {/* Pulse ring for key nodes */}
                 {(isOrigin || isDest) && (
-                  <circle
-                    cx={pos.x} cy={pos.y} r={r + 5}
-                    fill="none"
-                    stroke={isDest ? '#4ade80' : '#f0f9ff'}
-                    strokeWidth={1}
-                    opacity={0.4}
+                  <CircleMarker
+                    center={[n.lat, n.lon]}
+                    radius={r + 5}
+                    pathOptions={{
+                      fill: false,
+                      color: isDest ? '#4ade80' : '#f0f9ff',
+                      weight: 1,
+                      opacity: 0.4
+                    }}
+                    interactive={false}
                   />
                 )}
-                <circle
-                  cx={pos.x} cy={pos.y} r={r}
-                  fill={color}
-                  stroke={isKey ? '#fff' : 'rgba(255,255,255,0.2)'}
-                  strokeWidth={isKey ? 1.5 : 0.5}
-                  filter={isKey ? 'url(#node-glow)' : undefined}
-                />
-                {/* Label for key nodes */}
                 {isKey && (
-                  <text
-                    x={pos.x}
-                    y={pos.y - 11}
-                    textAnchor="middle"
-                    style={{
-                      fontFamily: 'Inter, sans-serif',
-                      fontSize: '9px',
-                      fontWeight: 700,
-                      fill: isDest ? '#4ade80' : isOrigin ? '#e0f2fe' : disrupted ? '#fca5a5' : '#fde68a',
-                      textShadow: '0 1px 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.8)',
-                    }}
+                  <Tooltip 
+                    permanent 
+                    direction="top" 
+                    className="custom-hub-tooltip" 
+                    offset={[0, -10]}
                   >
                     {n.label}
-                  </text>
+                  </Tooltip>
                 )}
-              </g>
+              </CircleMarker>
             )
           })}
-        </svg>
-        </div>
+          
+          <CustomZoomControl />
+        </MapContainer>
+      </div>
 
-        {/* Zoom controls (fixed screen position; map layer scales underneath) */}
-        <div
-          data-map-control
-          className="absolute left-2 top-1/2 z-20 flex -translate-y-1/2 flex-col gap-1 rounded-lg border border-slate-600/80 bg-slate-900/90 p-1 shadow-lg"
-        >
-          <div
-            className="mb-0.5 rounded px-1.5 py-0.5 text-center text-[8px] font-bold uppercase tracking-wider text-emerald-400"
-            style={{ borderBottom: '1px solid rgba(52,211,153,0.25)' }}
-          >
-            Satellite
-          </div>
-          <button
-            type="button"
-            title="Zoom in"
-            className="flex h-8 w-8 items-center justify-center rounded-md text-slate-200 hover:bg-slate-700"
-            onClick={() => setZoom(z => Math.min(2.85, Math.round((z + 0.2) * 100) / 100))}
-          >
-            <Plus size={16} />
-          </button>
-          <button
-            type="button"
-            title="Zoom out"
-            className="flex h-8 w-8 items-center justify-center rounded-md text-slate-200 hover:bg-slate-700"
-            onClick={() => setZoom(z => Math.max(0.55, Math.round((z - 0.2) * 100) / 100))}
-          >
-            <Minus size={16} />
-          </button>
-          <button
-            type="button"
-            title="Reset zoom & pan"
-            className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 hover:bg-slate-700 hover:text-slate-200"
-            onClick={() => {
-              setZoom(1)
-              setPan({ x: 0, y: 0 })
-            }}
-          >
-            <RotateCcw size={14} />
-          </button>
-          <div className="px-1 pb-0.5 text-center font-mono text-[9px] text-slate-500">
-            {Math.round(zoom * 100)}%
-          </div>
-          <div className="max-w-[4.5rem] px-0.5 pb-1 text-center text-[7px] leading-snug text-slate-500">
-            Scroll wheel zoom · drag map to pan
-          </div>
-        </div>
-
-        {/* Route info overlay */}
+      {/* Route info overlay */}
         {route && (
           <motion.div
             initial={{ opacity: 0, x: 10 }}
