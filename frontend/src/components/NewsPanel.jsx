@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { AlertTriangle, Clock3, ExternalLink, Newspaper, RefreshCw, WifiOff } from 'lucide-react'
-import { fetchRouteIntelligence } from '../services/api'
+import { fetchRouteIntelligence } from '../api/api'
 
 function formatRelativeTime(ts) {
   if (!ts) return 'Unknown time'

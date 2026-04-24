@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CloudRain, AlertTriangle, CheckCircle } from 'lucide-react'
 
-const BASE = 'http://localhost:8000'
+const BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
 
 function formatTime(iso) {
   if (!iso) return '—'
