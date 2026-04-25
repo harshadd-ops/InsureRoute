@@ -1023,7 +1023,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
         <div className="flex items-center justify-between px-6 py-3">
           <div className="flex items-center">
             <div className="h-10 flex items-center justify-center">
-              <img src="/logo-full.svg" alt="InsureRoute Logo" className="h-full w-auto object-contain" />
+              <img src="/logo-full.jpeg" alt="InsureRoute Logo" className="h-full w-auto object-contain" />
             </div>
           </div>
           <div className="flex items-center gap-4">
