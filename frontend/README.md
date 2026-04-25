@@ -1,16 +1,54 @@
-# React + Vite
+# InsureRoute Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the enterprise-grade React dashboard for **InsureRoute**, serving as the central Operational Command Center for real-time logistics risk monitoring.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## ⚡ Tech Stack
 
-## React Compiler
+- **Framework:** React 18
+- **Build Tool:** Vite (for ultra-fast HMR and optimized production builds)
+- **Styling:** Tailwind CSS (for scalable, utility-first design)
+- **State Management & Caching:** React Query
+- **Routing:** React Router v6
+- **Mapping:** React-Leaflet
+- **Icons:** Lucide React
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🚀 Architecture & Components
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The frontend is fully decoupled from the mathematical processing layer, acting exclusively as a real-time digital twin.
+
+Key components include:
+- `InsureRouteDashboard.jsx`: The primary unified operational view.
+- `ShipmentSetup.jsx`: The intuitive wizard for defining cargo variables (type, value, priority).
+- `KPICards.jsx`: Animated trackers for CO2 offsets, premium arbitrage, and gross cargo value.
+- `RouteIntelDrawer.jsx`: The slide-out pane rendering live Gemini AI insights and categorized news streams.
+
+---
+
+## 🛠️ Development Setup
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+3. Build for production:
+   ```bash
+   npm run build
+   ```
+
+---
+
+## ☁️ Deployment
+
+This frontend is optimized for edge delivery and serverless environments. It can be instantly containerized and deployed to **Google Cloud Run** or pushed globally via **Firebase Hosting**.
+
+For detailed deployment steps, refer to the root `deployment_guide.md`.
