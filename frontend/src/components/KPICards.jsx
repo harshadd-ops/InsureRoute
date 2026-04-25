@@ -111,7 +111,9 @@ export default function KPICards({ kpis }) {
               />
             </div>
             
-            <span className="text-xs font-medium text-muted mt-1">{card.desc}</span>
+            <span className="text-xs font-medium text-muted mt-1">
+              {card.key === 'co2' ? `Equivalent to ${Math.max(1, Math.round(value / 4000))} trucks off road` : card.desc}
+            </span>
           </motion.div>
         )
       })}

@@ -40,7 +40,7 @@ export default function RouteIntelDrawer({ isOpen, onClose, origin, destination 
         <div className="flex-shrink-0 px-6 py-4 bg-white border-b border-slate-200 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Newspaper size={18} className="text-blue-600" />
-            <h2 className="font-bold text-slate-800 text-lg">Route Intelligence</h2>
+            <h2 className="font-bold text-slate-800 text-lg">Live Route News</h2>
           </div>
           <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-colors">
             <X size={20} />

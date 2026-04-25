@@ -658,7 +658,8 @@ export default function InsureRouteDashboard() {
       setMitigationModal({
         oldRisk: `${Math.round(surgeRisk * 100)}%`, oldDelay: '14 hrs', oldPremium: `₹${surgePremium.toLocaleString('en-IN')} (Surge Pricing)`,
         newRisk: `${Math.round(optimizedRisk * 100)}%`, newDelay: '45 mins', newPremium: `₹${optimizedPremium.toLocaleString('en-IN')} (Optimized Base Rate)`,
-        actualSavings: actualSavings
+        actualSavings: actualSavings,
+        cargoValueStr: `₹${(cargoValue / 10000000).toFixed(2)} Crores`
       });
       if (routes.length > 1) {
         setSelectedRouteId(routes.find(r => r.mode === 'road' && !r.best)?.id || routes[0].id);
@@ -806,7 +807,8 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
       })
       .catch(() => setInsights(null))
       .finally(() => setLoadingInsights(false));
-  }, [insuranceRoute, disruptions, weatherData, newsData, setupData?.shipment_id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [insuranceRoute, setupData?.shipment_id]);
 
 
   // Auto-scroll chat
@@ -1030,7 +1032,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
               onClick={() => setIsRouteIntelOpen(true)}
               className="bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
             >
-              <Newspaper size={14} /> Route Intelligence
+              <Newspaper size={14} /> Live Route News
             </button>
             <button 
               onClick={triggerHollywoodDelay}
@@ -1254,7 +1256,10 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
       else if (coverageTier === 'all_risk') tierMult = 1.4;
 
       // ── Calculate premium components from CARGO VALUE ──────────────────────
-      const basePrem   = Math.round(cargoValue * BASE_RATE * modeMult);
+      // Incorporate trip duration into base rate modifier (longer trips = higher exposure)
+      const durationMult = 1 + (etaHours * 0.02); // 2% increase per hour of travel
+      
+      const basePrem   = Math.round(cargoValue * BASE_RATE * modeMult * durationMult);
       const weatherAdj = Math.round(basePrem * (weatherMultiplier - 1));
       const cargoAdj   = Math.round(basePrem * (cargoRiskMult - 1));
       const covAdj     = Math.round(basePrem * (tierMult - 1));
@@ -1262,9 +1267,15 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
       const totalPrem = Math.round((basePrem + weatherAdj + cargoAdj + covAdj) * tierMult);
       
       // Dynamic Risk Score (0-100)
-      const baseRiskScore = { road: 15, rail: 30, air: 45 }[insuranceRoute.mode];
+      const baseRiskScore = { road: 15, rail: 10, air: 25 }[insuranceRoute.mode] || 15;
       const weatherScore  = Math.round(weatherRisk * 50);
-      const riskScore     = Math.min(baseRiskScore + weatherScore, 100);
+      
+      // Add distance/duration factor to make it dynamic per route
+      const etaHours = parseInt(insuranceRoute.eta.split('h')[0] || 0) + (parseInt(insuranceRoute.eta.split('m')[0].split(' ').pop() || 0) / 60);
+      const durationRisk = Math.min(Math.round(etaHours * 1.5), 25);
+      
+      const rawScore = (baseRiskScore + weatherScore + durationRisk) * cargoRiskMult;
+      const riskScore = Math.min(Math.round(rawScore), 100);
       
       const riskClass = riskScore < 30 ? 'LOW' : riskScore < 60 ? 'MEDIUM' : 'HIGH';
       const riskClr   = { 
@@ -1608,7 +1619,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
                   </div>
                   <div>
                     <div className="text-xs text-slate-500 uppercase tracking-wider font-bold mb-1">Financial Exposure</div>
-                    <div className="text-xl font-bold text-slate-900">₹18.5 Crores at risk</div>
+                    <div className="text-xl font-bold text-slate-900">{mitigationModal.cargoValueStr} at risk</div>
                   </div>
                   <div>
                     <div className="text-xs text-slate-500 uppercase tracking-wider font-bold mb-1">Insurance Liability</div>
