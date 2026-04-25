@@ -17,7 +17,7 @@ function App() {
             <header className="bg-bgCard border-b border-border p-4 shadow-sm">
               <div className="max-w-7xl mx-auto flex items-center justify-between">
                 <img src="/logo-full.jpeg" alt="InsureRoute" className="h-8" />
-                <span className="text-sm text-textSecondary font-mono">Operations Command Center</span>
+                <span className="text-sm text-textSecondary font-mono hidden">Operations Command Center</span>
               </div>
             </header>
             <main className="p-4 md:p-6 max-w-7xl mx-auto">
@@ -38,7 +38,7 @@ function App() {
             <header className="bg-bgCard border-b border-border p-4 shadow-sm">
               <div className="max-w-7xl mx-auto flex items-center justify-between">
                 <img src="/logo-full.jpeg" alt="InsureRoute" className="h-8" />
-                <span className="text-sm text-textSecondary font-mono">Operations Command Center</span>
+                <span className="text-sm text-textSecondary font-mono hidden">Operations Command Center</span>
               </div>
             </header>
             <main className="p-4 md:p-6 max-w-7xl mx-auto">
@@ -54,7 +54,7 @@ function App() {
             <header className="bg-bgCard border-b border-border p-4 shadow-sm">
               <div className="max-w-7xl mx-auto flex items-center justify-between">
                 <img src="/logo-full.jpeg" alt="InsureRoute" className="h-8" />
-                <span className="text-sm text-textSecondary font-mono">Operations Command Center</span>
+                <span className="text-sm text-textSecondary font-mono hidden">Operations Command Center</span>
               </div>
             </header>
             <main className="p-4 md:p-6 max-w-7xl mx-auto">
@@ -70,7 +70,7 @@ function App() {
             <header className="bg-bgCard border-b border-border p-4 shadow-sm">
               <div className="max-w-7xl mx-auto flex items-center justify-between">
                 <img src="/logo-full.jpeg" alt="InsureRoute" className="h-8" />
-                <span className="text-sm text-textSecondary font-mono">Operations Command Center</span>
+                <span className="text-sm text-textSecondary font-mono hidden">Operations Command Center</span>
               </div>
             </header>
             <main className="p-4 md:p-6 max-w-7xl mx-auto">

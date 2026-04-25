@@ -1039,7 +1039,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
             >
               <AlertCircle size={14} /> Inject Crisis
             </button>
-            <div className="flex items-center gap-2 border-l border-slate-200 pl-4">
+            <div className="flex items-center gap-2 border-l border-slate-200 pl-4 hidden">
               <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
               <span className="text-sm text-slate-500 font-medium">Operations Command Center</span>
             </div>
