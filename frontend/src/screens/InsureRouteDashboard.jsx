@@ -972,13 +972,13 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
             <div class="section">
               <div class="section-title">Safety Pros</div>
               <ul class="list">
-                ${(insights?.pros || []).map(p => `<li style="font-size: 13px; margin-bottom: 5px;">${p}</li>`).join('')}
+                ${(Array.isArray(insights?.pros) ? insights.pros : []).map(p => `<li style="font-size: 13px; margin-bottom: 5px;">${p}</li>`).join('')}
               </ul>
             </div>
             <div class="section">
               <div class="section-title">Risk Factors</div>
               <ul class="list">
-                ${(insights?.cons || []).map(c => `<li style="font-size: 13px; margin-bottom: 5px;">${c}</li>`).join('')}
+                ${(Array.isArray(insights?.cons) ? insights.cons : []).map(c => `<li style="font-size: 13px; margin-bottom: 5px;">${c}</li>`).join('')}
               </ul>
             </div>
           </div>
@@ -1022,8 +1022,8 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
       <header className="flex-shrink-0 bg-white border-b border-slate-200 shadow-sm z-10">
         <div className="flex items-center justify-between px-6 py-3">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
-              <Navigation size={16} className="text-white" />
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm overflow-hidden">
+              <img src="/logo.svg" alt="InsureRoute Logo" className="w-full h-full object-cover" />
             </div>
             <span className="text-xl font-bold text-blue-600 tracking-tight">InsureRoute</span>
           </div>
@@ -1271,11 +1271,12 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
       const weatherScore  = Math.round(weatherRisk * 50);
       
       // Add distance/duration factor to make it dynamic per route
-      const etaHours = parseInt(insuranceRoute.eta.split('h')[0] || 0) + (parseInt(insuranceRoute.eta.split('m')[0].split(' ').pop() || 0) / 60);
-      const durationRisk = Math.min(Math.round(etaHours * 1.5), 25);
+      const etaStr = insuranceRoute?.eta || '0h 0m';
+      const etaHours = parseInt(etaStr.split('h')[0] || 0) + (parseInt(etaStr.split('m')[0].split(' ').pop() || 0) / 60);
+      const durationRisk = Math.min(Math.round((etaHours || 0) * 1.5), 25);
       
       const rawScore = (baseRiskScore + weatherScore + durationRisk) * cargoRiskMult;
-      const riskScore = Math.min(Math.round(rawScore), 100);
+      const riskScore = Math.min(Math.round(rawScore || 0), 100);
       
       const riskClass = riskScore < 30 ? 'LOW' : riskScore < 60 ? 'MEDIUM' : 'HIGH';
       const riskClr   = { 
@@ -1547,7 +1548,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
                     <div className="bg-emerald-50/50 border border-emerald-100 p-3 rounded-lg">
                       <div className="text-[10px] font-bold text-emerald-700 mb-2 uppercase tracking-wide flex items-center gap-1"><CheckCircle className="w-3 h-3"/> Strengths</div>
                       <ul className="space-y-1.5">
-                        {(insights.pros || []).map((p, i) => (
+                        {(Array.isArray(insights?.pros) ? insights.pros : []).map((p, i) => (
                           <li key={i} className="flex items-start gap-1.5 text-xs text-slate-700">
                             <span className="text-emerald-500 mt-0.5 shrink-0">•</span>
                             <span className="leading-tight">{p}</span>
@@ -1558,7 +1559,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
                     <div className="bg-red-50/50 border border-red-100 p-3 rounded-lg">
                       <div className="text-[10px] font-bold text-red-600 mb-2 uppercase tracking-wide flex items-center gap-1"><X className="w-3 h-3"/> Weaknesses</div>
                       <ul className="space-y-1.5">
-                        {(insights.cons || []).map((c, i) => (
+                        {(Array.isArray(insights?.cons) ? insights.cons : []).map((c, i) => (
                           <li key={i} className="flex items-start gap-1.5 text-xs text-slate-700">
                             <span className="text-red-500 mt-0.5 shrink-0">•</span>
                             <span className="leading-tight">{c}</span>
