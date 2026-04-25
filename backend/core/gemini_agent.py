@@ -1,7 +1,9 @@
 import os
+import asyncio
 import google.generativeai as genai
 from typing import Any
 from google.ai.generativelanguage import Type
+from core.gemini_guard import call_gemini_with_guard
 
 TOOLS = [
     {
@@ -154,7 +156,7 @@ class GeminiAgent:
         full_context = f"SHIPMENT CONTEXT: {context}\n\nUSER REQUEST: {user_message}"
         
         try:
-            response = chat.send_message(full_context)
+            response = call_gemini_with_guard(full_context, lambda: chat.send_message(full_context))
             
             # Agentic loop: process tool calls
             max_iterations = 5
@@ -187,7 +189,10 @@ class GeminiAgent:
                             })
                 
                 if tool_results:
-                    response = chat.send_message(tool_results)
+                    response = call_gemini_with_guard(
+                        f"{user_message}-tool-loop-{len(tools_used)}",
+                        lambda: chat.send_message(tool_results),
+                    )
             
             # Extract final text response
             final_text = "".join(p.text for p in response.parts if hasattr(p, 'text') and p.text)
@@ -212,7 +217,7 @@ async def analyze_weather_image(image_base64: str, route_context: dict) -> str:
          
     model = genai.GenerativeModel("gemini-2.5-flash")
     try:
-        response = model.generate_content([
+        payload = [
             {
                 "role": "user",
                 "parts": [
@@ -222,7 +227,11 @@ async def analyze_weather_image(image_base64: str, route_context: dict) -> str:
                              f"Be specific about which checkpoints are affected."}
                 ]
             }
-        ])
+        ]
+        response = call_gemini_with_guard(
+            f"image-analysis-{str(route_context)}",
+            lambda: model.generate_content(payload),
+        )
         return response.text
     except Exception as e:
         return f"Failed to analyze image: {str(e)}"

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation } from 'react-router-dom';
-import { getLiveDisruptions, getWeatherStatus, getRouteNews, getNodes } from '../api';
+import { getLiveDisruptions, getWeatherStatus, getRouteNews, getNodes, chatWithAgent } from '../api';
 import {
   MapContainer,
   TileLayer,
@@ -34,10 +34,6 @@ import {
   CloudLightning, Activity, Briefcase, FileText, CloudRain, Cloud
 } from 'lucide-react';
 import KPICards from '../components/KPICards';
-
-// ─── Gemini Config ─────────────────────────────────────────────────────────────
-// ⚠️ Replace this placeholder with your actual Gemini API key before testing.
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 const BASE_ROUTES = [
   {
@@ -132,29 +128,12 @@ const makePin = (color, label) =>
 // Dynamic icons will be created in MapLayer to support dynamic naming
 
 // ─── Gemini API Call ───────────────────────────────────────────────────────────
-async function callGemini(history) {
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_instruction: {
-          parts: [
-            {
-              text: 'You are InsureRoute AI, a logistics and freight optimization assistant. Help users choose the best shipping route considering cost, ETA, risk, and cargo type. Be concise and practical. Use bullet points when comparing options.',
-            },
-          ],
-        },
-        contents: history,
-      }),
-    }
-  );
-  const data = await res.json();
-  return (
-    data.candidates?.[0]?.content?.parts?.[0]?.text ??
-    'Unable to reach InsureRoute AI. Please try again.'
-  );
+async function callGeminiViaBackend(message, shipmentId) {
+  const payload = await chatWithAgent({
+    shipment_id: shipmentId,
+    message,
+  });
+  return payload?.response || 'Unable to reach InsureRoute AI. Please try again.';
 }
 
 const INIT_PROMPT =
@@ -801,23 +780,18 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
   "one_line_verdict": "One bold decisive sentence — the complete situation and recommended posture in plain English"
 }`;
 
-    fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.2 }
-      })
+    chatWithAgent({
+      shipment_id: setupData?.shipment_id,
+      message: prompt,
     })
-      .then(r => r.json())
-      .then(data => {
-        const raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '{}';
+      .then((data) => {
+        const raw = data?.response ?? '{}';
         const clean = raw.replace(/```json|```/g, '').trim();
         setInsights(JSON.parse(clean));
       })
       .catch(() => setInsights(null))
       .finally(() => setLoadingInsights(false));
-  }, [insuranceRoute, disruptions, weatherData, newsData]);
+  }, [insuranceRoute, disruptions, weatherData, newsData, setupData?.shipment_id]);
 
 
   // Auto-scroll chat
@@ -834,7 +808,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
       try {
         const INIT_PROMPT = `The user is shipping cargo from ${originNode.name} to ${destinationNode.name}. We have ${routes.length} route options. Briefly introduce yourself as InsureRoute AI and provide a one-sentence high-level summary of the best route choice based on current data. Keep it professional.`;
         const initHistory = [{ role: 'user', parts: [{ text: INIT_PROMPT }] }];
-        const reply = await callGemini(initHistory);
+        const reply = await callGeminiViaBackend(INIT_PROMPT, setupData?.shipment_id);
         const newHistory = [
           ...initHistory,
           { role: 'model', parts: [{ text: reply }] },
@@ -868,7 +842,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
       ];
       setTyping(true);
       try {
-        const reply = await callGemini(newHistory);
+        const reply = await callGeminiViaBackend(userText, setupData?.shipment_id);
         const updatedHistory = [
           ...newHistory,
           { role: 'model', parts: [{ text: reply }] },
@@ -887,7 +861,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
         setTyping(false);
       }
     },
-    [history]
+    [history, setupData?.shipment_id]
   );
 
   // Select route + notify Gemini

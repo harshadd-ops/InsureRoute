@@ -19,6 +19,7 @@ import time
 import hashlib
 import json
 import logging
+from core.gemini_guard import call_gemini_with_guard
 
 logger = logging.getLogger("insure_route.route_risk_advisor")
 
@@ -184,18 +185,24 @@ def _fingerprint(context: dict) -> str:
 
 # ── REST call ──────────────────────────────────────────────────────────────────
 def _call_gemini(api_key: str, prompt: str) -> str:
-    url = f"{_API_BASE}/{_MODEL_NAME}:generateContent"
-    payload = {
-        "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {
-            "maxOutputTokens": _MAX_TOKENS,
-            "temperature": 0.35,
-        },
-    }
-    resp = _requests.post(url, params={"key": api_key}, json=payload, timeout=45)
-    resp.raise_for_status()
-    data = resp.json()
-    return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+    def _request():
+        url = f"{_API_BASE}/{_MODEL_NAME}:generateContent"
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "maxOutputTokens": _MAX_TOKENS,
+                "temperature": 0.35,
+            },
+        }
+        resp = _requests.post(url, params={"key": api_key}, json=payload, timeout=45)
+        resp.raise_for_status()
+        data = resp.json()
+        return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+
+    result = call_gemini_with_guard(prompt, _request)
+    if isinstance(result, dict) and result.get("fallback"):
+        return result["text"]
+    return result
 
 
 # ── Response parser ────────────────────────────────────────────────────────────

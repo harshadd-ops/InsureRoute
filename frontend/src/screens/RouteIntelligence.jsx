@@ -5,9 +5,6 @@ import { getRouteOptions, chatWithAgent, getNodes, getLiveDisruptions, getWeathe
 import Map from '../components/Map';
 import { Bot, Send, ShieldAlert, Zap, Truck, Train, Plane, Ship, CheckCircle2, ChevronRight, Upload, Info, X, CloudLightning, FileText, AlertTriangle, Briefcase, Activity, CheckCircle, Navigation, TrendingUp, TrendingDown } from 'lucide-react';
 
-// ── Gemini API Key ─────────────────────────────────────────────────────────────
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-
 export default function RouteIntelligence() {
   const { shipmentId } = useParams();
   const navigate = useNavigate();
@@ -156,16 +153,12 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
   "one_line_verdict": "One bold decisive sentence — the complete situation and recommended posture in plain English"
 }`;
 
-    fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }]
-      })
+    chatWithAgent({
+      shipment_id: shipmentId,
+      message: prompt,
     })
-      .then(r => r.json())
       .then(data => {
-        const raw = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '{}';
+        const raw = data?.response ?? '{}';
         const clean = raw.replace(/```json|```/g, '').trim();
         setInsights(JSON.parse(clean));
       })

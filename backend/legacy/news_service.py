@@ -11,6 +11,7 @@ import time
 import hashlib
 import json
 import logging
+from core.gemini_guard import call_gemini_with_guard
 
 logger = logging.getLogger("insure_route.news")
 
@@ -146,18 +147,24 @@ def _build_route_prompt(context: dict) -> str:
 
 
 def _call_gemini(api_key: str, prompt: str) -> str:
-    url = f"{_API_BASE}/{_MODEL_NAME}:generateContent"
-    payload = {
-        "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {
-            "maxOutputTokens": _MAX_TOKENS,
-            "temperature": 0.45,
-        },
-    }
-    resp = _requests.post(url, params={"key": api_key}, json=payload, timeout=35)
-    resp.raise_for_status()
-    data = resp.json()
-    return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+    def _request():
+        url = f"{_API_BASE}/{_MODEL_NAME}:generateContent"
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+                "maxOutputTokens": _MAX_TOKENS,
+                "temperature": 0.45,
+            },
+        }
+        resp = _requests.post(url, params={"key": api_key}, json=payload, timeout=35)
+        resp.raise_for_status()
+        data = resp.json()
+        return data["candidates"][0]["content"]["parts"][0]["text"].strip()
+
+    result = call_gemini_with_guard(prompt, _request)
+    if isinstance(result, dict) and result.get("fallback"):
+        return result["text"]
+    return result
 
 
 def get_route_news(context: dict) -> dict:
