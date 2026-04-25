@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="textGradBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#14345c"/>
+      <stop offset="100%" stop-color="#1b5a8e"/>
+    </linearGradient>
+    <linearGradient id="textGradTeal" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#389e9f"/>
+      <stop offset="100%" stop-color="#49cdad"/>
+    </linearGradient>
+    <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1b5a8e"/>
+      <stop offset="50%" stop-color="#389e9f"/>
+      <stop offset="100%" stop-color="#5bfcd7"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(20, 20)">
+    <!-- "Insure" (Dark Blue) -->
+    <text x="0" y="110" font-family="'Inter', 'Segoe UI', sans-serif" font-weight="800" font-size="120" fill="url(#textGradBlue)" letter-spacing="-3">Insure</text>
+    
+    <!-- Stylized "R" replacing the start of "Route" -->
+    <g transform="translate(380, 0)">
+      <!-- Stem of R -->
+      <path d="M0,25 Q15,25 25,40 L25,110 L0,110 Z" fill="url(#arrowGrad)" />
+      
+      <!-- Loop of R, wrapping into an arrow shape -->
+      <path d="M0,25 C45,25 70,35 70,60 C70,80 50,90 25,90 L0,90 Z" fill="none" stroke="url(#arrowGrad)" stroke-width="25" stroke-linecap="round"/>
+      
+      <!-- Arrow pointing right (Leg of the R) -->
+      <path d="M25,80 L75,110 L50,65 Z" fill="#49cdad"/>
+    </g>
+
+    <!-- "oute" (Teal Gradient) -->
+    <text x="460" y="110" font-family="'Inter', 'Segoe UI', sans-serif" font-weight="800" font-size="120" fill="url(#textGradTeal)" letter-spacing="-3">oute</text>
+
+    <!-- Tagline (Bottom) -->
+    <text x="5" y="160" font-family="'Inter', 'Segoe UI', sans-serif" font-weight="400" font-size="30" fill="#475569" letter-spacing="1">Smart Supply Chain Intelligence &amp; Dynamic Pricing</text>
+  </g>
+</svg>

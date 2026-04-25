@@ -1021,11 +1021,10 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <header className="flex-shrink-0 bg-white border-b border-slate-200 shadow-sm z-10">
         <div className="flex items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm overflow-hidden">
-              <img src="/logo.svg" alt="InsureRoute Logo" className="w-full h-full object-cover" />
+          <div className="flex items-center">
+            <div className="h-10 flex items-center justify-center">
+              <img src="/logo-full.svg" alt="InsureRoute Logo" className="h-full w-auto object-contain" />
             </div>
-            <span className="text-xl font-bold text-blue-600 tracking-tight">InsureRoute</span>
           </div>
           <div className="flex items-center gap-4">
             <button 
