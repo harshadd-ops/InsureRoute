@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const BASE = 'http://localhost:8000'
+const API_ROOT = import.meta.env.VITE_API_BASE || 'https://insureroute-backend-758641920121.us-central1.run.app'
+const BASE = `${API_ROOT}/api/v1`
 
 // ── API client ──────────────────────────────────────────────────────────────
 const client = axios.create({ baseURL: BASE, timeout: 5000 })

@@ -31,9 +31,10 @@ import {
   TrendingDown,
   AlertCircle,
   Download,
-  CloudLightning, Activity, Briefcase, FileText, CloudRain, Cloud
+  CloudLightning, Activity, Briefcase, FileText, CloudRain, Cloud, Newspaper
 } from 'lucide-react';
 import KPICards from '../components/KPICards';
+import RouteIntelDrawer from '../components/RouteIntelDrawer';
 
 const BASE_ROUTES = [
   {
@@ -599,17 +600,34 @@ export default function InsureRouteDashboard() {
 
   // ── Hackathon Demo State ────────────────────────────────────────────────────
   const [scenarioActive, setScenarioActive] = useState(false);
+  const [isRouteIntelOpen, setIsRouteIntelOpen] = useState(false);
   const [isHollywoodDelay, setIsHollywoodDelay] = useState(false);
   const [delayText, setDelayText] = useState('');
   const [mitigationModal, setMitigationModal] = useState(null);
   const [mitigationComplete, setMitigationComplete] = useState(false);
 
   // Baseline global metrics so the dashboard looks alive before the demo
-  const [globalBaseline] = useState({
+  // These will now dynamically increment based on the actual cargo values
+  const [globalBaseline, setGlobalBaseline] = useState({
     co2: 12450,
     savings: 310500,
     shocks: 12
   });
+
+  const location = useLocation();
+  const setupData = location.state; // contains { options: [...] }
+
+  useEffect(() => {
+    // Generate dynamic baseline metrics based on the current cargo value
+    if (setupData?.cargo_value_inr) {
+      const cargo = setupData.cargo_value_inr;
+      setGlobalBaseline({
+        co2: Math.round(cargo * 0.00012), 
+        savings: Math.round(cargo * 0.0035), 
+        shocks: Math.floor(Math.random() * 5) + 8 
+      });
+    }
+  }, [setupData]);
 
   const triggerHollywoodDelay = () => {
     setScenarioActive(true);
@@ -617,7 +635,7 @@ export default function InsureRouteDashboard() {
     setDelayText('⚠️ ISOLATION FOREST ANOMALY DETECTED: SEVERITY 0.89');
     
     // Dynamic Actuarial Calculation based on actual cargo value
-    const cargoValue = setupData?.cargo_value_inr || 185000000;
+    const cargoValue = setupData?.cargo_value_inr || 500000;
     const basePrem = Math.round(cargoValue * 0.003); // 0.3% standard rate
     
     const surgeRisk = 0.89; // 89% risk on compromised route
@@ -648,12 +666,9 @@ export default function InsureRouteDashboard() {
     }, 1800);
   };
 
-  const location = useLocation();
-  const setupData = location.state; // contains { options: [...] }
-
   const demoKpis = {
-    cargo_value: scenarioActive ? 185000000 : (setupData?.cargo_value_inr || 185000000), // Default to massive value
-    co2: mitigationComplete ? globalBaseline.co2 + 456 : globalBaseline.co2,
+    cargo_value: setupData?.cargo_value_inr || 500000, 
+    co2: mitigationComplete ? globalBaseline.co2 + Math.round((setupData?.cargo_value_inr || 500000) * 0.00002) : globalBaseline.co2,
     premium_savings: mitigationComplete ? globalBaseline.savings + (mitigationModal?.actualSavings || 0) : globalBaseline.savings,
     shocks_averted: mitigationComplete ? globalBaseline.shocks + 1 : globalBaseline.shocks
   };
@@ -1011,6 +1026,12 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
             <span className="text-xl font-bold text-blue-600 tracking-tight">InsureRoute</span>
           </div>
           <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsRouteIntelOpen(true)}
+              className="bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+            >
+              <Newspaper size={14} /> Route Intelligence
+            </button>
             <button 
               onClick={triggerHollywoodDelay}
               className="bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
@@ -1515,7 +1536,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
                     <div className="bg-emerald-50/50 border border-emerald-100 p-3 rounded-lg">
                       <div className="text-[10px] font-bold text-emerald-700 mb-2 uppercase tracking-wide flex items-center gap-1"><CheckCircle className="w-3 h-3"/> Strengths</div>
                       <ul className="space-y-1.5">
-                        {insights.pros.map((p, i) => (
+                        {(insights.pros || []).map((p, i) => (
                           <li key={i} className="flex items-start gap-1.5 text-xs text-slate-700">
                             <span className="text-emerald-500 mt-0.5 shrink-0">•</span>
                             <span className="leading-tight">{p}</span>
@@ -1526,7 +1547,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
                     <div className="bg-red-50/50 border border-red-100 p-3 rounded-lg">
                       <div className="text-[10px] font-bold text-red-600 mb-2 uppercase tracking-wide flex items-center gap-1"><X className="w-3 h-3"/> Weaknesses</div>
                       <ul className="space-y-1.5">
-                        {insights.cons.map((c, i) => (
+                        {(insights.cons || []).map((c, i) => (
                           <li key={i} className="flex items-start gap-1.5 text-xs text-slate-700">
                             <span className="text-red-500 mt-0.5 shrink-0">•</span>
                             <span className="leading-tight">{c}</span>
@@ -1628,6 +1649,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
         </div>
       )}
 
+      <RouteIntelDrawer isOpen={isRouteIntelOpen} onClose={() => setIsRouteIntelOpen(false)} origin={originId} destination={destinationId} />
     <style>{`
       @keyframes slideIn {
         from { transform: translateX(100%); opacity: 0; }

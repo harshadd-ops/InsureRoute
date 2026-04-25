@@ -14,8 +14,9 @@ _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _CANDIDATES = [
     os.path.join(_ROOT, "data", _FILENAME),
     os.path.join(_ROOT, _FILENAME),
+    os.path.join(os.path.dirname(_ROOT), "data", _FILENAME),
 ]
-DATA_PATH = next((p for p in _CANDIDATES if os.path.exists(p)), _CANDIDATES[0])
+DATA_PATH = next((p for p in _CANDIDATES if os.path.exists(p)), _CANDIDATES[2])
 
 
 def load_data(filepath: str = DATA_PATH) -> pd.DataFrame:

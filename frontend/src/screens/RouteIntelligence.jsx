@@ -567,7 +567,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
                     <div className="bg-emerald-50/50 border border-emerald-100 p-3 rounded-lg">
                       <div className="text-[10px] font-bold text-emerald-700 mb-2 uppercase tracking-wide flex items-center gap-1"><CheckCircle className="w-3 h-3"/> Strengths</div>
                       <ul className="space-y-1.5">
-                        {insights.pros.map((p, i) => (
+                        {(insights.pros || []).map((p, i) => (
                           <li key={i} className="flex items-start gap-1.5 text-xs text-slate-700">
                             <span className="text-emerald-500 mt-0.5 shrink-0">•</span>
                             <span className="leading-tight">{p}</span>
@@ -578,7 +578,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
                     <div className="bg-red-50/50 border border-red-100 p-3 rounded-lg">
                       <div className="text-[10px] font-bold text-red-600 mb-2 uppercase tracking-wide flex items-center gap-1"><X className="w-3 h-3"/> Weaknesses</div>
                       <ul className="space-y-1.5">
-                        {insights.cons.map((c, i) => (
+                        {(insights.cons || []).map((c, i) => (
                           <li key={i} className="flex items-start gap-1.5 text-xs text-slate-700">
                             <span className="text-red-500 mt-0.5 shrink-0">•</span>
                             <span className="leading-tight">{c}</span>
@@ -594,8 +594,8 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
                       Estimated Cost Breakdown
                     </div>
                     <div className="space-y-2.5">
-                      {Object.entries(insights.cost_breakdown).map(([key, val]) => {
-                        const total = Object.values(insights.cost_breakdown).reduce((a, b) => a + b, 0);
+                      {Object.entries(insights.cost_breakdown || {}).map(([key, val]) => {
+                        const total = Object.values(insights.cost_breakdown || {}).reduce((a, b) => a + b, 0);
                         const pct = total > 0 ? Math.round((val / total) * 100) : 0;
                         return (
                           <div key={key}>

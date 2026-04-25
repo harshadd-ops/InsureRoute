@@ -27,6 +27,6 @@ class InsuranceQuoteRequest(BaseModel):
     coverage_type: str
     
 class ChatMessage(BaseModel):
-    shipment_id: str
+    shipment_id: Optional[str] = None
     message: str
     image_base64: Optional[str] = None

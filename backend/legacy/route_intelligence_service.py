@@ -262,7 +262,7 @@ def _fetch_live_news(route_ctx: Dict[str, Any]) -> Tuple[List[Dict[str, Any]], D
 
 
 def _build_weather_alerts(route_ctx: Dict[str, Any]) -> List[Dict[str, Any]]:
-    weather = fetch_route_weather()
+    weather = fetch_route_weather(route_ctx.get("path_nodes", []))
     alerts: List[Dict[str, Any]] = []
     for cp in weather.get("checkpoints", []):
         if cp.get("is_dangerous"):

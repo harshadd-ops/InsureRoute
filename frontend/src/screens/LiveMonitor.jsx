@@ -10,9 +10,11 @@ export default function LiveMonitor() {
   const { shipmentId } = useParams();
   const navigate = useNavigate();
   const [wsData, setWsData] = useState(null);
+  const apiRoot = import.meta.env.VITE_API_BASE || 'https://insureroute-backend-758641920121.us-central1.run.app';
+  const wsRoot = apiRoot.replace(/^http/, 'ws');
   
   useEffect(() => {
-    const ws = new WebSocket(`ws://localhost:8000/ws/monitor/${shipmentId}`);
+    const ws = new WebSocket(`${wsRoot}/ws/monitor/${shipmentId}`);
     ws.onmessage = (event) => {
       setWsData(JSON.parse(event.data));
     };

@@ -27,7 +27,7 @@ from pydantic import BaseModel
 from typing import Optional
 
 from legacy.simulation import run_tick, get_summary_stats, _initialize
-from legacy.graph_engine import get_node_positions, HUBS, get_graph
+from legacy.graph_engine import get_node_positions, HUBS, get_graph, find_route
 
 try:
     from legacy.weather_service import fetch_route_weather
@@ -129,7 +129,8 @@ async def _weather_polling_loop():
 # ── Startup: warm ML engine + kick off weather polling ───────────────────────
 @legacy_router.on_event("startup")
 async def startup():
-    _initialize()
+    # Keep startup non-blocking so the service can bind PORT quickly.
+    asyncio.create_task(asyncio.to_thread(_initialize))
     # Fire the first weather check immediately (non-blocking)
     asyncio.create_task(_weather_polling_loop())
 
@@ -203,8 +204,11 @@ def map_directions(
 
 
 @legacy_router.get("/weather-status")
-def weather_status():
-    """Returns the latest live weather assessment for all 8 route checkpoints."""
+def weather_status(origin: str = Query(None), destination: str = Query(None)):
+    """Returns the latest live weather assessment for the route checkpoints."""
+    if origin and destination and WEATHER_SERVICE_AVAILABLE:
+        path_nodes = find_route(origin, destination).get("path", [origin, destination])
+        return fetch_route_weather(path_nodes)
     return live_weather_state
 
 
@@ -216,8 +220,12 @@ def get_data(
     monsoon: bool = Query(True),
     anomaly_threshold: float = Query(-0.15),
 ):
-    import copy
-    weather = copy.deepcopy(live_weather_state)
+    path_nodes = find_route(origin, destination).get("path", [origin, destination])
+    if WEATHER_SERVICE_AVAILABLE:
+        weather = fetch_route_weather(path_nodes)
+    else:
+        import copy
+        weather = copy.deepcopy(live_weather_state)
 
     # ── Decide whether live weather forces a disruption ───────────────────────
     weather_triggered = weather.get("is_dangerous", False)
@@ -415,7 +423,11 @@ def ai_advisor(
             "model": None,
         }
 
-    weather = live_weather_state
+    if WEATHER_SERVICE_AVAILABLE:
+        path_nodes = find_route(origin, destination).get("path", [origin, destination])
+        weather = fetch_route_weather(path_nodes)
+    else:
+        weather = live_weather_state
     weather_triggered = weather.get("is_dangerous", False)
 
     tick = run_tick(
@@ -479,7 +491,11 @@ def route_news(
             "route": f"{origin} → {destination}",
         }
 
-    weather           = live_weather_state
+    if WEATHER_SERVICE_AVAILABLE:
+        path_nodes = find_route(origin, destination).get("path", [origin, destination])
+        weather = fetch_route_weather(path_nodes)
+    else:
+        weather = live_weather_state
     weather_triggered = weather.get("is_dangerous", False)
 
     # Run a quick tick to get the risk score for this specific route
@@ -579,7 +595,10 @@ def route_risk_analysis(
         path_names = [origin, destination]
 
     # Run a tick to get ML model output
-    weather        = live_weather_state
+    if WEATHER_SERVICE_AVAILABLE:
+        weather = fetch_route_weather(path_names)
+    else:
+        weather = live_weather_state
     weather_triggered = weather.get("is_dangerous", False)
 
     tick = run_tick(

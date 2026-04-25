@@ -53,8 +53,12 @@ def score_route_tool(route_id: str, cargo_type: str, cargo_value_inr: float = 0,
     hour = now.hour
     day_of_week = now.weekday()
 
+    route_checkpoints = checkpoints or ["Pune_Hub", "Mumbai_Hub"]
+
     # Derive weather inputs from live state
-    weather_state = live_weather_state
+    from legacy.weather_service import fetch_route_weather
+    weather_state = fetch_route_weather(route_checkpoints)
+    
     worst_weather_severity = 0.0
     checkpoint_weather = {}
     for cp in weather_state.get("checkpoints", []):
@@ -78,7 +82,6 @@ def score_route_tool(route_id: str, cargo_type: str, cargo_value_inr: float = 0,
     }
 
     # Score each checkpoint on the route using the ML model
-    route_checkpoints = checkpoints or ["CP04", "CP06"]  # Default Pune-Mumbai route checkpoints
     ml_scores = []
     for cp_id in route_checkpoints:
         try:
@@ -142,12 +145,22 @@ agent = GeminiAgent(tool_executors)
 @app.on_event("startup")
 async def startup_event():
     await disruption_simulator.start()
-    _initialize()
+    # Do not block boot on heavy ML warm-up; Cloud Run requires fast startup.
+    asyncio.create_task(asyncio.to_thread(_initialize))
     asyncio.create_task(_weather_polling_loop())
 
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+
+@app.get("/")
+def root():
+    return {
+        "service": "InsureRoute API",
+        "status": "running",
+        "docs": "/docs",
+        "health": "/health",
+    }
 
 @app.get("/api/v1/nodes")
 def get_nodes():
@@ -215,11 +228,11 @@ def quote_insurance(req: InsuranceQuoteRequest):
 
 @app.post("/api/v1/gemini/chat")
 async def chat_with_agent(req: ChatMessage):
-    if req.shipment_id not in shipments_db:
-        raise HTTPException(status_code=404, detail="Shipment not found")
+    context = {"cargo_type": "standard", "priority": "standard"}
     
-    shipment = shipments_db[req.shipment_id]
-    context = {"cargo_type": shipment["details"]["cargo_type"], "priority": shipment["details"]["priority"]}
+    if req.shipment_id and req.shipment_id in shipments_db:
+        shipment = shipments_db[req.shipment_id]
+        context = {"cargo_type": shipment["details"]["cargo_type"], "priority": shipment["details"]["priority"]}
     
     if req.image_base64:
         # User uploaded an image

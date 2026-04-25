@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
+const API_ROOT = import.meta.env.VITE_API_BASE || 'https://insureroute-backend-758641920121.us-central1.run.app'
+const BASE = `${API_ROOT}/api/v1`
 
 /**
  * Fetch road-following coordinates for an ordered list of hub ids.
