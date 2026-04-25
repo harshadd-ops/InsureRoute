@@ -676,8 +676,8 @@ export default function InsureRouteDashboard() {
   
   const { data: nodes } = useQuery({ queryKey: ['nodes'], queryFn: getNodes });
 
-  const originId = setupData?.options?.[0]?.path?.[0] || 'Pune_Hub';
-  const destinationId = setupData?.options?.[0]?.path?.slice(-1)[0] || 'Mumbai_Hub';
+  const originId = setupData?.options?.[0]?.path?.[0] || 'PUNE_DEPOT';
+  const destinationId = setupData?.options?.[0]?.path?.slice(-1)[0] || 'MUMBAI_DEST';
   
   const originNode = nodes?.find(n => n.id === originId);
   const destinationNode = nodes?.find(n => n.id === destinationId);
@@ -803,9 +803,26 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
       .then((data) => {
         const raw = data?.response ?? '{}';
         const clean = raw.replace(/```json|```/g, '').trim();
-        setInsights(JSON.parse(clean));
+        try {
+          setInsights(JSON.parse(clean));
+        } catch (e) {
+          console.error("Failed to parse Gemini response", e, raw);
+          setInsights({ 
+            one_line_verdict: "Error: AI response parsing failed",
+            summary: raw,
+            risk_level: "MEDIUM",
+            risk_reason: "AI unavailable",
+            routing_verdict: "System fallback required"
+          });
+        }
       })
-      .catch(() => setInsights(null))
+      .catch(() => setInsights({
+        one_line_verdict: "Error: AI unavailable",
+        summary: "Failed to reach InsureRoute AI.",
+        risk_level: "MEDIUM",
+        risk_reason: "AI unavailable",
+        routing_verdict: "System fallback required"
+      }))
       .finally(() => setLoadingInsights(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [insuranceRoute, setupData?.shipment_id]);

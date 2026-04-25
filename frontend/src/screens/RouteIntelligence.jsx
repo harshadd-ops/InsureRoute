@@ -46,8 +46,8 @@ export default function RouteIntelligence() {
   });
 
   const { data: newsData } = useQuery({
-    queryKey: ['newsData', 'Pune_Hub', 'Mumbai_Hub'],
-    queryFn: () => getRouteNews('Pune_Hub', 'Mumbai_Hub'),
+    queryKey: ['newsData', 'PUNE_DEPOT', 'MUMBAI_DEST'],
+    queryFn: () => getRouteNews('PUNE_DEPOT', 'MUMBAI_DEST'),
     refetchInterval: 60000
   });
 
@@ -56,8 +56,14 @@ export default function RouteIntelligence() {
     onSuccess: (data) => {
       setChatHistory(prev => [...prev, {
         role: 'agent',
-        content: data.response,
+        content: data.response || 'No response from AI.',
         tools: data.tools_invoked
+      }]);
+    },
+    onError: (error) => {
+      setChatHistory(prev => [...prev, {
+        role: 'agent',
+        content: `Unable to reach InsureRoute AI. Please try again. (${error.message})`
       }]);
     }
   });
@@ -160,9 +166,26 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
       .then(data => {
         const raw = data?.response ?? '{}';
         const clean = raw.replace(/```json|```/g, '').trim();
-        setInsights(JSON.parse(clean));
+        try {
+          setInsights(JSON.parse(clean));
+        } catch (e) {
+          console.error("Failed to parse Gemini response", e, raw);
+          setInsights({ 
+            one_line_verdict: "Error: AI response parsing failed",
+            summary: raw,
+            risk_level: "MEDIUM",
+            risk_reason: "AI unavailable",
+            routing_verdict: "System fallback required"
+          });
+        }
       })
-      .catch(() => setInsights(null))
+      .catch(() => setInsights({
+        one_line_verdict: "Error: AI unavailable",
+        summary: "Failed to reach InsureRoute AI.",
+        risk_level: "MEDIUM",
+        risk_reason: "AI unavailable",
+        routing_verdict: "System fallback required"
+      }))
       .finally(() => setLoadingInsights(false));
   }, [knowMoreRoute]);
 

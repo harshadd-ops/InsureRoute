@@ -25,18 +25,20 @@ _feature_cols = None
 
 def _initialize():
     global _df, _model, _scaler, _feature_cols
-    if _df is not None:
+    if _feature_cols is not None:
         return
 
-    print("[simulation] Initialising pipeline …")
+    print("[simulation] Initialising pipeline ...")
     raw = load_data()
-    _df = engineer_features(raw)
-    X_scaled, scaler, feature_cols = normalize_features(_df)
-    model = build_model()
-    model.fit(X_scaled)
-    _model = model
-    _scaler = scaler
-    _feature_cols = feature_cols
+    temp_df = engineer_features(raw)
+    X_scaled, temp_scaler, temp_feature_cols = normalize_features(temp_df)
+    temp_model = build_model()
+    temp_model.fit(X_scaled)
+    
+    _model = temp_model
+    _scaler = temp_scaler
+    _df = temp_df
+    _feature_cols = temp_feature_cols
     print("[simulation] Pipeline ready.")
 
 
