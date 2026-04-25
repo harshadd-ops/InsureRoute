@@ -3,10 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { getCargoTypes, createShipment, getNodes } from '../api';
 import Map from '../components/Map';
-import { Package, MapPin, Navigation, Clock, Truck, Train, Plane, Anchor } from 'lucide-react';
+import { Package, MapPin, Navigation, Clock, Truck, Train, Plane, Anchor, Monitor, Pill, Wrench, FlaskConical, Shirt, Leaf } from 'lucide-react';
 
 export default function ShipmentSetup() {
   const navigate = useNavigate();
+  
+  const iconMap = {
+    'electronics': <Monitor className="w-6 h-6 text-indigo-500" />,
+    'pharmaceuticals': <Pill className="w-6 h-6 text-rose-500" />,
+    'automotive': <Wrench className="w-6 h-6 text-slate-500" />,
+    'fmcg': <Package className="w-6 h-6 text-amber-600" />,
+    'chemicals': <FlaskConical className="w-6 h-6 text-emerald-500" />,
+    'textiles': <Shirt className="w-6 h-6 text-sky-500" />,
+    'perishables': <Leaf className="w-6 h-6 text-green-600" />
+  };
+
   const [formData, setFormData] = useState({
     origin: 'PUNE_DEPOT',
     destination: 'MUMBAI_DEST',
@@ -47,7 +58,7 @@ export default function ShipmentSetup() {
   return (
     <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-100px)]">
       {/* Left Panel - Form */}
-      <div className="w-full lg:w-[40%] bg-bgCard p-6 rounded-xl shadow-card overflow-y-auto">
+      <div className="w-full lg:w-[40%] bg-bgCard p-6 rounded-xl shadow-card overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
           <Package className="text-accentPrimary" />
           New Shipment
@@ -105,7 +116,9 @@ export default function ShipmentSetup() {
                         ? 'border-accentPrimary bg-bgCardAlt text-accentPrimary shadow-sm' 
                         : 'border-border hover:bg-bgPrimary text-textSecondary'}`}
                   >
-                    <span className="text-2xl">{ct.icon}</span>
+                    <div className="flex items-center justify-center h-8">
+                      {iconMap[ct.id] || <Package className="w-6 h-6" />}
+                    </div>
                     <span className="text-xs text-center truncate w-full">{ct.label}</span>
                   </button>
                 ))}
