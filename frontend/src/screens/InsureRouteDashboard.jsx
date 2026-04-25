@@ -98,7 +98,7 @@ const BASE_ROUTES = [
 const MUMBAI = [18.9388, 72.8354];
 const PUNE = [18.5204, 73.8567];
 
-// ─── Leaflet Icon Fix ───────────────────────────────────────────────────────────
+//  Leaflet Icon Fix 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -109,7 +109,7 @@ L.Icon.Default.mergeOptions({
     'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
-// ─── Custom Pin Icons ─────────────────────────────────────────────────────────
+//  Custom Pin Icons 
 const makePin = (color, label) =>
   L.divIcon({
     className: '',
@@ -128,7 +128,7 @@ const makePin = (color, label) =>
 
 // Dynamic icons will be created in MapLayer to support dynamic naming
 
-// ─── Gemini API Call ───────────────────────────────────────────────────────────
+//  Gemini API Call 
 async function callGeminiViaBackend(message, shipmentId) {
   const payload = await chatWithAgent({
     shipment_id: shipmentId,
@@ -140,7 +140,7 @@ async function callGeminiViaBackend(message, shipmentId) {
 const INIT_PROMPT =
   'The user is shipping cargo from Mumbai to Pune. We have 3 route options: (1) Road only via NH48: ETA 2h 31m, Cost ₹3,360, low traffic delay risk; (2) Rail + Road: ETA 6h 7m, Cost ₹6,951, rail schedule dependency risk; (3) Air + Road: ETA 5h 45m, Cost ₹42,800, weather-dependent risk. Greet the user as InsureRoute AI, recommend the best route with a brief reason, and ask if they have any constraints such as cargo type, budget, or urgency.';
 
-// ─── Mode Icon ────────────────────────────────────────────────────────────────
+//  Mode Icon 
 function ModeIcon({ mode, size = 16, className = '' }) {
   const cls = `${className}`;
   if (mode === 'road')
@@ -160,7 +160,7 @@ function ModeIcon({ mode, size = 16, className = '' }) {
   );
 }
 
-// ─── Typing Indicator ─────────────────────────────────────────────────────────
+//  Typing Indicator 
 function TypingDots() {
   return (
     <div className="flex items-end gap-1 px-4 py-3 bg-white rounded-2xl rounded-tl-sm shadow-sm w-fit">
@@ -175,7 +175,7 @@ function TypingDots() {
   );
 }
 
-// ─── Markdown Renderer ────────────────────────────────────────────────────────
+//  Markdown Renderer 
 /**
  * Lightweight parser: handles **bold**, `code`, # headers, * / - / 1. lists,
  * blank-line paragraphs, and horizontal rules. No external deps.
@@ -189,7 +189,7 @@ function renderMarkdown(text, isUser) {
     : 'bg-slate-100 text-slate-700';
   const bulletDot  = isUser ? 'bg-blue-300' : 'bg-blue-500';
 
-  // ── inline: **bold** and `code` ──────────────────────────────────────────
+  //  inline: **bold** and `code` 
   const renderInline = (str) => {
     const parts = [];
     const re = /(\*\*(.+?)\*\*|`([^`]+)`)/g;
@@ -206,7 +206,7 @@ function renderMarkdown(text, isUser) {
     return parts;
   };
 
-  // ── split into logical blocks ─────────────────────────────────────────────
+  //  split into logical blocks 
   const lines = text.split('\n');
   const blocks = [];
   let listBuffer = [];   // { ordered, items }
@@ -264,7 +264,7 @@ function renderMarkdown(text, isUser) {
   }
   flushList();
 
-  // ── render blocks ─────────────────────────────────────────────────────────
+  //  render blocks 
   const rendered = [];
   let prevBr = false;
 
@@ -323,7 +323,7 @@ function renderMarkdown(text, isUser) {
   return rendered;
 }
 
-// ─── Chat Bubble ──────────────────────────────────────────────────────────────
+//  Chat Bubble 
 function ChatBubble({ role, text }) {
   const isUser = role === 'user';
   return (
@@ -342,7 +342,7 @@ function ChatBubble({ role, text }) {
 }
 
 
-// ─── Route Card ───────────────────────────────────────────────────────────────
+//  Route Card 
 function RouteCard({ route, selected, onSelect, onKnowMore }) {
   const modeColor = {
     road: 'border-blue-500',
@@ -454,7 +454,7 @@ function RouteCard({ route, selected, onSelect, onKnowMore }) {
             : 'bg-slate-100 text-slate-700 hover:bg-blue-50 hover:text-blue-700'
         }`}
       >
-        {selected ? '✓ Route Selected' : 'Select Route'}
+        {selected ? ' Route Selected' : 'Select Route'}
       </button>
 
       {/* Know More → Insurance */}
@@ -471,7 +471,7 @@ function RouteCard({ route, selected, onSelect, onKnowMore }) {
   );
 }
 
-// ─── Weather Icon Helper ──────────────────────────────────────────────────
+//  Weather Icon Helper 
 function getWeatherIcon(id) {
   if (id >= 200 && id < 300) return <CloudLightning size={14} className="text-amber-500" />;
   if (id >= 300 && id < 600) return <CloudRain size={14} className="text-blue-500" />;
@@ -480,7 +480,7 @@ function getWeatherIcon(id) {
   return <Cloud size={14} className="text-slate-400" />;
 }
 
-// ─── Map Route Layer ──────────────────────────────────────────────────────────
+//  Map Route Layer 
 function MapLayer({ selectedRouteId, weatherData, routes, originNode, destinationNode }) {
   const originIcon = makePin('#1e40af', originNode?.name || 'Origin');
   const destIcon = makePin('#b91c1c', destinationNode?.name || 'Destination');
@@ -540,7 +540,7 @@ function MapLayer({ selectedRouteId, weatherData, routes, originNode, destinatio
             className: 'custom-div-icon',
             html: `<div class="p-1 bg-white rounded-full shadow-md border border-slate-200 flex items-center justify-center ${cp.is_dangerous ? 'animate-pulse border-red-400' : ''}">
               <div class="w-6 h-6 flex items-center justify-center">
-                ${cp.is_dangerous ? '⚠️' : '🌤️'}
+                ${cp.is_dangerous ? '️' : '️'}
               </div>
             </div>`,
             iconSize: [28, 28],
@@ -582,7 +582,7 @@ function MapLayer({ selectedRouteId, weatherData, routes, originNode, destinatio
   );
 }
 
-// ─── Main Dashboard ───────────────────────────────────────────────────────────
+//  Main Dashboard 
 export default function InsureRouteDashboard() {
   const [selectedRouteId, setSelectedRouteId] = useState(1);
   const [messages, setMessages] = useState([]);
@@ -591,14 +591,14 @@ export default function InsureRouteDashboard() {
   const [typing, setTyping] = useState(false);
   const chatEndRef = useRef(null);
 
-  // ── Insurance drawer state ──────────────────────────────────────────────────
+  //  Insurance drawer state 
   const [insuranceRoute, setInsuranceRoute] = useState(null);
   const [coverageTier, setCoverageTier] = useState('comprehensive');
   const [insights, setInsights] = useState(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
   const [routes, setRoutes] = useState([]);
 
-  // ── Hackathon Demo State ────────────────────────────────────────────────────
+  //  Hackathon Demo State 
   const [scenarioActive, setScenarioActive] = useState(false);
   const [isRouteIntelOpen, setIsRouteIntelOpen] = useState(false);
   const [isHollywoodDelay, setIsHollywoodDelay] = useState(false);
@@ -632,7 +632,7 @@ export default function InsureRouteDashboard() {
   const triggerHollywoodDelay = () => {
     setScenarioActive(true);
     setIsHollywoodDelay(true);
-    setDelayText('⚠️ ISOLATION FOREST ANOMALY DETECTED: SEVERITY 0.89');
+    setDelayText('️ ISOLATION FOREST ANOMALY DETECTED: SEVERITY 0.89');
     
     // Dynamic Actuarial Calculation based on actual cargo value
     const cargoValue = setupData?.cargo_value_inr || 500000;
@@ -648,9 +648,9 @@ export default function InsureRouteDashboard() {
     
     const actualSavings = surgePremium - optimizedPremium;
     
-    setTimeout(() => setDelayText('⚡ RECALCULATING GRAPH TOPOLOGY (DIJKSTRA BYPASS)...'), 400);
-    setTimeout(() => setDelayText('📊 RE-PRICING ACTUARIAL HEDGE BASED ON NEW RISK VECTOR...'), 900);
-    setTimeout(() => setDelayText('✅ SECURING CARGO. APPLYING PREMIUM DISCOUNT.'), 1400);
+    setTimeout(() => setDelayText(' RECALCULATING GRAPH TOPOLOGY (DIJKSTRA BYPASS)...'), 400);
+    setTimeout(() => setDelayText(' RE-PRICING ACTUARIAL HEDGE BASED ON NEW RISK VECTOR...'), 900);
+    setTimeout(() => setDelayText(' SECURING CARGO. APPLYING PREMIUM DISCOUNT.'), 1400);
     
     setTimeout(() => {
       setIsHollywoodDelay(false);
@@ -736,7 +736,7 @@ export default function InsureRouteDashboard() {
     enabled: !!originId && !!destinationId
   });
 
-  // ── Gemini AI Insights logic ────────────────────────────────────────────────
+  //  Gemini AI Insights logic 
   useEffect(() => {
     if (!insuranceRoute) return;
     setInsights(null);
@@ -746,7 +746,7 @@ export default function InsureRouteDashboard() {
 
 You have received LIVE sensor data from OpenWeatherMap across all route checkpoints, live news from NewsData API, and actuarial insurance data. Use ONLY the numbers below. Never invent data.
 
-━━━ ROUTE ━━━
+ ROUTE 
 Route ID        : ${insuranceRoute.id}
 Modes           : ${insuranceRoute.mode}
 Path            : ${insuranceRoute.stops?.join(' → ') || 'N/A'}
@@ -756,8 +756,8 @@ Multimodal      : ${insuranceRoute.mode !== 'road' ? 'Yes' : 'No'}
 System Pick     : ${insuranceRoute.best ? 'Yes — Recommended' : 'No'}
 Active Alerts   : ${disruptions?.map(d => d.checkpoint_id).join(', ') || 'None'}
 
-━━━ LIVE WEATHER (OpenWeatherMap) ━━━
-Overall Status  : ${weatherData?.is_dangerous ? '🔴 DANGEROUS' : '🟢 CLEAR'}
+ LIVE WEATHER (OpenWeatherMap) 
+Overall Status  : ${weatherData?.is_dangerous ? ' DANGEROUS' : '🟢 CLEAR'}
 Last Polled     : ${weatherData?.last_checked || 'Unknown'}
 Auto-Reroute Via: ${weatherData?.alternate_route_via || 'N/A'}
 
@@ -766,15 +766,15 @@ Checkpoint : ${cp.name} (${cp.role?.replace(/_/g, ' ')})
 Condition  : ${cp.description}
 Temp       : ${cp.temperature}°C | Humidity: ${cp.humidity}%
 Rain       : ${cp.rain_1h ?? 0} mm/hr | Wind: ${cp.wind_speed ?? 0} m/s
-Severity   : ${Math.round((cp.severity ?? 0) * 100)}% | Dangerous: ${cp.is_dangerous ? 'YES ⚠️' : 'No'}
+Severity   : ${Math.round((cp.severity ?? 0) * 100)}% | Dangerous: ${cp.is_dangerous ? 'YES ️' : 'No'}
 `).join('---') || 'No live checkpoint data available.'}
 
-━━━ LIVE NEWS (NewsData API) ━━━
+ LIVE NEWS (NewsData API) 
 ${(newsData?.news || []).filter(n => (n.relevance_score || 0) >= 0.4).slice(0, 4).map(n =>
   `- "${n.title}" | Source: ${n.source} | Relevance: ${(n.relevance_score || 0).toFixed(2)} | Location: ${n.location_tag || 'Route Corridor'} | Published: ${n.published_at || 'Recent'}`
 ).join('\n') || 'No high-relevance news for this corridor right now.'}
 
-━━━ YOUR TASK ━━━
+ YOUR TASK 
 Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JSON.
 
 {
@@ -1018,7 +1018,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
   return (
     <>
     <div className="flex flex-col overflow-hidden bg-slate-50" style={{ height: '100dvh' }}>
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      {/*  Header  */}
       <header className="flex-shrink-0 bg-white border-b border-slate-200 shadow-sm z-10">
         <div className="flex items-center justify-between px-6 py-3">
           <div className="flex items-center">
@@ -1047,9 +1047,9 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
         </div>
       </header>
 
-      {/* ── Three-panel body ────────────────────────────────────────────────── */}
+      {/*  Three-panel body  */}
       <div className="flex flex-1 overflow-hidden">
-        {/* ── LEFT: Route Options ─────────────────────────────────────────── */}
+        {/*  LEFT: Route Options  */}
         <aside className="w-72 flex-shrink-0 flex flex-col bg-slate-50 border-r border-slate-200 overflow-hidden">
           <div className="px-4 pt-4 pb-3 border-b border-slate-200 bg-white">
             <div className="flex items-center gap-2">
@@ -1106,7 +1106,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
           </div>
         </aside>
 
-        {/* ── CENTER: Map ──────────────────────────────────────────────────── */}
+        {/*  CENTER: Map  */}
         <div className="flex-1 relative flex flex-col overflow-hidden bg-slate-50">
           <div className="p-4 z-[400] shadow-sm border-b border-slate-200 bg-white relative shrink-0">
              <KPICards kpis={demoKpis} />
@@ -1154,7 +1154,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
         </div>
         </div>
 
-        {/* ── RIGHT: Gemini Chat ───────────────────────────────────────────── */}
+        {/*  RIGHT: Gemini Chat  */}
         <aside className="w-80 flex-shrink-0 flex flex-col bg-white border-l border-slate-200">
           {/* Chat header */}
           <div className="flex-shrink-0 px-4 py-3 border-b border-slate-200 bg-gradient-to-r from-blue-600 to-blue-700">
@@ -1225,7 +1225,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
     </div>
 
     {insuranceRoute && (() => {
-      // ── Real Actuarial Logic using Cargo Value (NOT transport cost) ─────────
+      //  Real Actuarial Logic using Cargo Value (NOT transport cost) 
       // cargo_value_inr comes from the shipment setup form via location.state
       const cargoValue = setupData?.cargo_value_inr || 500000;
       const cargoTypeId = setupData?.cargo_type || 'fmcg';
@@ -1254,7 +1254,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
       else if (coverageTier === 'comprehensive') tierMult = 1.0;
       else if (coverageTier === 'all_risk') tierMult = 1.4;
 
-      // ── Calculate premium components from CARGO VALUE ──────────────────────
+      //  Calculate premium components from CARGO VALUE 
       // Incorporate trip duration into base rate modifier (longer trips = higher exposure)
       const durationMult = 1 + (etaHours * 0.02); // 2% increase per hour of travel
       
@@ -1583,7 +1583,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
       );
     })()}
 
-      {/* ── Hollywood Delay Overlay ─────────────────────────────────────── */}
+      {/*  Hollywood Delay Overlay  */}
       {isHollywoodDelay && (
         <div className="fixed inset-0 z-[9999] bg-slate-900/85 backdrop-blur-sm flex items-center justify-center">
           <div className="font-mono text-emerald-400 text-xl font-bold tracking-wider animate-pulse flex items-center gap-3">
@@ -1593,7 +1593,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
         </div>
       )}
 
-      {/* ── Before/After Mitigation Modal ───────────────────────────────── */}
+      {/*  Before/After Mitigation Modal  */}
       {mitigationModal && (
         <div className="fixed inset-0 z-[9998] bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4" onClick={() => setMitigationModal(null)}>
           <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-4xl w-full" style={{ animation: 'slideIn 0.3s ease-out' }} onClick={e => e.stopPropagation()}>

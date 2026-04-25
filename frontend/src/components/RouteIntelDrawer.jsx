@@ -24,7 +24,7 @@ export default function RouteIntelDrawer({ isOpen, onClose, origin, destination 
                     riskLevel === 'MEDIUM' ? 'text-amber-600 bg-amber-50 border-amber-200' : 
                     'text-emerald-600 bg-emerald-50 border-emerald-200';
 
-  const riskDot = riskLevel === 'HIGH' ? '🔴' : riskLevel === 'MEDIUM' ? '🟡' : '🟢';
+  const riskDot = riskLevel === 'HIGH' ? '' : riskLevel === 'MEDIUM' ? '🟡' : '🟢';
 
   return (
     <div className="fixed inset-0 z-[9999] flex justify-end">
@@ -94,7 +94,7 @@ export default function RouteIntelDrawer({ isOpen, onClose, origin, destination 
                 <div className="space-y-3">
                   {data.news?.length > 0 ? data.news.map((item, i) => {
                     const impactLvl = item.impact?.toUpperCase() || 'LOW';
-                    const icon = impactLvl === 'HIGH' ? '🔴' : impactLvl === 'MEDIUM' ? '🟡' : '🟢';
+                    const icon = impactLvl === 'HIGH' ? '' : impactLvl === 'MEDIUM' ? '🟡' : '🟢';
                     
                     return (
                       <div key={i} className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:border-slate-300 transition-colors group">

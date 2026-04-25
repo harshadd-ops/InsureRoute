@@ -5,7 +5,7 @@ import { fetchRoadGeometry } from '../services/routeGeometry'
 import { MapContainer, TileLayer, Polyline, CircleMarker, Tooltip, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 
-// ── Node coordinates (real Indian hub lat/lon) ────────────────────────────
+//  Node coordinates (real Indian hub lat/lon) 
 const NODE_MAP = {
   Delhi_Hub:         { lon: 77.2090, lat: 28.6139, label: 'Delhi'        },
   Mumbai_Hub:        { lon: 72.8777, lat: 19.0760, label: 'Mumbai'       },
@@ -44,7 +44,7 @@ const CARGO_OPTIONS = [
   { id: 'Automotive Parts', label: 'Automotive Parts' },
 ]
 
-// ── Edges — background network display only ──────────────────────────────
+//  Edges — background network display only 
 // NOTE: These edges are used ONLY for drawing the grey background network.
 // The active route path is drawn separately from route.path directly,
 // so direction mismatches here do NOT affect route highlighting.
@@ -95,7 +95,7 @@ const EDGE_PAIRS = [
   ['Visakhapatnam_Hub', 'Hyderabad_Hub'],
 ]
 
-// ── Leaflet Controls ────────────────────────────────────────────────────────
+//  Leaflet Controls 
 function MapController({ routePath, activeCoords }) {
   const map = useMap()
   const lastFlownRoute = useRef('')
@@ -290,7 +290,7 @@ export default function GraphView({ nodes = [], edges = [], route = null, params
   const fetchAbortRef = useRef(null)
   const prevSelectionRef = useRef({ origin: '', destination: '', cargoType: '' })
 
-  // ── Auto-close dropdown when all 3 fields are filled ───────────────────
+  //  Auto-close dropdown when all 3 fields are filled 
   useEffect(() => {
     const prev = prevSelectionRef.current
     const allFilled = params?.origin && params?.destination && params?.cargoType

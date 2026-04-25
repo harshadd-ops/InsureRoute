@@ -5,7 +5,7 @@ Uses the Gemini REST API directly via requests (no SDK dependency).
 This avoids all SDK versioning and API-version issues.
 
 Optimisations
-─────────────
+
 1. No SDK – plain HTTP POST to the REST endpoint, zero SDK overhead.
 2. Server-side cache – 60-second TTL based on context fingerprint.
 3. Compact prompt – ~150 input tokens.
@@ -21,7 +21,7 @@ from core.gemini_guard import call_gemini_with_guard
 
 logger = logging.getLogger("insure_route.gemini")
 
-# ── Load .env from repo root and backend/.env ─────────────────────────────────
+#  Load .env from repo root and backend/.env 
 try:
     try:
         from env_loader import load_insure_route_env
@@ -38,17 +38,17 @@ except ImportError:
     REQUESTS_AVAILABLE = False
     logger.warning("requests not installed — AI advisor disabled")
 
-# ── Configuration ─────────────────────────────────────────────────────────────
+#  Configuration 
 # REST endpoint — v1beta is the standard Gemini API version
 _API_BASE   = "https://generativelanguage.googleapis.com/v1beta/models"
 _MODEL_NAME = "gemini-2.5-flash"
 _CACHE_TTL  = 60    # seconds
 _MAX_TOKENS = 256
 
-# ── In-process response cache ─────────────────────────────────────────────────
+#  In-process response cache 
 _cache: dict = {}
 
-# ── System + prompt ───────────────────────────────────────────────────────────
+#  System + prompt 
 _SYSTEM_PROMPT = (
     "You are InsureRoute AI, a concise logistics risk advisor. "
     "Analyse the shipment snapshot below and reply EXACTLY in this format:\n"
@@ -59,7 +59,7 @@ _SYSTEM_PROMPT = (
 )
 
 
-# ── Context fingerprint ───────────────────────────────────────────────────────
+#  Context fingerprint 
 def _fingerprint(context: dict) -> str:
     ins   = context.get("insurance", {})
     route = context.get("route", {})
@@ -77,7 +77,7 @@ def _fingerprint(context: dict) -> str:
     return hashlib.md5(json.dumps(key, sort_keys=True).encode()).hexdigest()
 
 
-# ── Compact prompt builder ────────────────────────────────────────────────────
+#  Compact prompt builder 
 def _build_prompt(context: dict) -> str:
     ins   = context.get("insurance", {})
     route = context.get("route", {})
@@ -112,7 +112,7 @@ def _build_prompt(context: dict) -> str:
     return "\n".join(lines)
 
 
-# ── Response parser ───────────────────────────────────────────────────────────
+#  Response parser 
 def _parse(text: str) -> tuple:
     summary, actions, tip = "", [], ""
     section = None
@@ -134,7 +134,7 @@ def _parse(text: str) -> tuple:
     return summary or text[:300], actions[:4], tip
 
 
-# ── REST call ─────────────────────────────────────────────────────────────────
+#  REST call 
 def _call_gemini(api_key: str, prompt: str) -> str:
     """POST to the Gemini REST API and return the generated text."""
     def _request():
@@ -162,7 +162,7 @@ def _call_gemini(api_key: str, prompt: str) -> str:
     return result
 
 
-# ── Public API ────────────────────────────────────────────────────────────────
+#  Public API 
 def get_ai_advisory(context: dict) -> dict:
     """
     Return a cached advisory if available, otherwise call the Gemini REST API.
@@ -183,13 +183,13 @@ def get_ai_advisory(context: dict) -> dict:
     fp  = _fingerprint(context)
     now = time.monotonic()
 
-    # ── Cache hit ─────────────────────────────────────────────────────────────
+    #  Cache hit 
     if fp in _cache and (now - _cache[fp]["ts"]) < _CACHE_TTL:
         result = dict(_cache[fp]["result"])
         result["cached"] = True
         return result
 
-    # ── Cache miss → REST call ────────────────────────────────────────────────
+    #  Cache miss → REST call 
     try:
         prompt  = _build_prompt(context)
         text    = _call_gemini(api_key, prompt)

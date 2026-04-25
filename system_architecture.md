@@ -73,27 +73,27 @@ The core mathematical execution environment contains robust, independent modules
 
 ```text
 User Action (React Dashboard)
-      │
-      ▼
+      
+      
 [Frontend] HTTP POST Payload (Origin, Dest, Cargo Value, Cargo Type)
-      │
-      ▼
+      
+      
 [FastAPI on Cloud Run] API Gateway
-      │
-      ├──► NetworkX Graph Engine (Calculates initial shortest paths)
-      │
-      ├──► OpenWeatherMap API (Fetches live coordinate telemetry)
-      │
-      ├──► RandomForest ML Model (Scores path risk based on telemetry)
-      │
-      ├──► Insurance Engine (Calculates dynamic premium arbitrage)
-      │
-      └──► Gemini 2.5 Flash Agent (Generates contextual natural language insights)
-      │
-      ▼
+      
+       NetworkX Graph Engine (Calculates initial shortest paths)
+      
+       OpenWeatherMap API (Fetches live coordinate telemetry)
+      
+       RandomForest ML Model (Scores path risk based on telemetry)
+      
+       Insurance Engine (Calculates dynamic premium arbitrage)
+      
+       Gemini 2.5 Flash Agent (Generates contextual natural language insights)
+      
+      
 [Backend] Serializes all outputs into consolidated JSON
-      │
-      ▼
+      
+      
 [Frontend] Renders animated routes, populates KPIs, displays PDF quotes
 ```
 

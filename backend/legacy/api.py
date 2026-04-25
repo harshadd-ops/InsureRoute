@@ -67,10 +67,10 @@ except ImportError:
 
 logger = logging.getLogger("insure_route.api")
 
-# ── App ────────────────────────────────────────────────────────────────────────
+#  App 
 legacy_router = APIRouter()
 
-# ── Global weather state (updated every 60 s by background task) ─────────────
+#  Global weather state (updated every 60 s by background task) 
 live_weather_state: dict = {
     "is_dangerous": False,
     "reason": "Weather API unavailable - running on ML detection only",
@@ -82,7 +82,7 @@ live_weather_state: dict = {
 _weather_task_running = False
 
 
-# ── Background weather polling loop ──────────────────────────────────────────
+#  Background weather polling loop 
 async def _weather_polling_loop():
     """Poll OpenWeatherMap every 60 seconds and update live_weather_state."""
     global live_weather_state, _weather_task_running
@@ -126,7 +126,7 @@ async def _weather_polling_loop():
         await asyncio.sleep(60)
 
 
-# ── Startup: warm ML engine + kick off weather polling ───────────────────────
+#  Startup: warm ML engine + kick off weather polling 
 @legacy_router.on_event("startup")
 async def startup():
     # Keep startup non-blocking so the service can bind PORT quickly.
@@ -135,7 +135,7 @@ async def startup():
     asyncio.create_task(_weather_polling_loop())
 
 
-# ── Schemas ────────────────────────────────────────────────────────────────────
+#  Schemas 
 class DisruptionRequest(BaseModel):
     origin: str = "Pune_Hub"
     destination: str = "Mumbai_Hub"
@@ -144,7 +144,7 @@ class DisruptionRequest(BaseModel):
     anomaly_threshold: float = -0.15
 
 
-# ── Helpers ────────────────────────────────────────────────────────────────────
+#  Helpers 
 def build_graph_payload():
     G = get_graph()
     positions = get_node_positions()
@@ -164,7 +164,7 @@ def build_graph_payload():
     return nodes, edges
 
 
-# ── Routes ─────────────────────────────────────────────────────────────────────
+#  Routes 
 @legacy_router.get("/health")
 def health():
     return {"status": "ok", "ts": time.time()}
@@ -190,14 +190,14 @@ def map_directions(
         return {
             "mode": "fallback",
             "coordinates": [],
-            "message": "⚠ Optimized route unavailable (service module missing)",
+            "message": " Optimized route unavailable (service module missing)",
         }
     ids = parse_path_query(path)
     if len(ids) < 2:
         return {
             "mode": "fallback",
             "coordinates": [],
-            "message": "⚠ Optimized route unavailable (need at least 2 waypoints)",
+            "message": " Optimized route unavailable (need at least 2 waypoints)",
         }
     positions = get_node_positions()
     return get_route_geometry(ids, positions)
@@ -227,7 +227,7 @@ def get_data(
         import copy
         weather = copy.deepcopy(live_weather_state)
 
-    # ── Decide whether live weather forces a disruption ───────────────────────
+    #  Decide whether live weather forces a disruption 
     weather_triggered = weather.get("is_dangerous", False)
     weather_severity  = weather.get("severity", 0.0) if weather_triggered else 0.0
 
@@ -283,7 +283,7 @@ def get_data(
     stats = get_summary_stats()
     nodes, edges = build_graph_payload()
 
-    # ── Override / augment pricing when driven by live weather ───────────────
+    #  Override / augment pricing when driven by live weather 
     pricing = tick["pricing"]
     if weather_triggered:
         weather_multiplier = round(min(weather_severity * 1.4, 1.8), 3)
@@ -327,7 +327,7 @@ def get_data(
         "edges": edges,
         "flags": tick["flags"],
         "raw":   tick["raw_sample"],
-        # ── Weather metadata ─────────────────────────────────────────────────
+        #  Weather metadata 
         "trigger_source":  "LIVE_WEATHER"   if weather_triggered else "MANUAL_OR_ML",
         "live_data":       True,
         **(
@@ -347,7 +347,7 @@ def get_data(
 
 @legacy_router.post("/inject-disruption")
 def inject_disruption(req: DisruptionRequest):
-    # ── Unchanged — manual injection path ────────────────────────────────────
+    #  Unchanged — manual injection path 
     tick = run_tick(
         origin=req.origin,
         destination=req.destination,

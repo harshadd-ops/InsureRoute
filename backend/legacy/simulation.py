@@ -16,7 +16,7 @@ from graph_engine import find_route, HUBS, build_graph
 from pricing_engine import compute_hedge
 
 
-# ── Module-level singletons ──────────────────────────────────────────────────
+#  Module-level singletons 
 _df = None
 _model = None
 _scaler = None
@@ -73,7 +73,7 @@ def run_tick(
     """
     _initialize()
 
-    # ── 1. Sample a random recent shipment (or inject demo row) ──────────────
+    #  1. Sample a random recent shipment (or inject demo row) 
     sample = _df.sample(1).iloc[0].to_dict()
 
     # Override key fields with user/demo parameters
@@ -90,19 +90,19 @@ def run_tick(
         sample["weather_severity_index"] = random.uniform(0.7, 1.0)
         sample["temperature_deviation"] = random.uniform(4, 10)
 
-    # ── 2. Score with Isolation Forest ───────────────────────────────────────
+    #  2. Score with Isolation Forest 
     ml_result = score_single(sample, _model, _scaler, _feature_cols)
     disruption_prob = ml_result["disruption_probability"]
     is_disrupted = ml_result["disruption_flag"] == 1
 
-    # ── 3. Graph rerouting ───────────────────────────────────────────────────
+    #  3. Graph rerouting 
     disrupted_edge = None
     if is_disrupted and G_has_direct_edge(origin, destination):
         disrupted_edge = (origin, destination)
 
     route_info = find_route(origin, destination, disrupted_edge=disrupted_edge)
 
-    # ── 4. Insurance pricing ─────────────────────────────────────────────────
+    #  4. Insurance pricing 
     price = compute_hedge(
         cargo_value=cargo_value,
         disruption_probability=disruption_prob,
@@ -156,7 +156,7 @@ if __name__ == "__main__":
     # Quick smoke test — run 3 ticks
     for i in range(3):
         result = run_tick(inject_disruption=(i == 1))
-        print(f"\n── Tick {i+1} ──")
+        print(f"\n Tick {i+1} ")
         print(f"  Disruption: {result['disruption_detected']} (p={result['disruption_probability']:.3f})")
         print(f"  Route: {' → '.join(result['route']['path'][:5])} ...")
         print(f"  Hedge before: ₹{result['pricing']['hedge_cost_before']:,.0f}")

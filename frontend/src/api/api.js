@@ -3,10 +3,10 @@ import axios from 'axios'
 const API_ROOT = import.meta.env.VITE_API_BASE || 'https://insureroute-backend-758641920121.us-central1.run.app'
 const BASE = `${API_ROOT}/api/v1`
 
-// ── API client ──────────────────────────────────────────────────────────────
+//  API client 
 const client = axios.create({ baseURL: BASE, timeout: 5000 })
 
-// ── Network nodes (Indian supply chain hubs, lon/lat) ─────────────────────
+//  Network nodes (Indian supply chain hubs, lon/lat) 
 export const MOCK_NODES = [
   { id: 'Delhi_Hub',          label: 'Delhi Hub',         lon: 77.1, lat: 28.7 },
   { id: 'Mumbai_Hub',         label: 'Mumbai Hub',        lon: 72.8, lat: 19.1 },
@@ -30,7 +30,7 @@ export const MOCK_NODES = [
   { id: 'Kochi_Hub',          label: 'Kochi Hub',         lon: 76.3, lat: 10.0 },
 ]
 
-// ── Edge graph (bidirectional hub connections) ─────────────────────────────
+//  Edge graph (bidirectional hub connections) 
 const EDGE_PAIRS = [
   ['Pune_Hub',       'Mumbai_Hub'],
   ['Pune_Hub',       'Nashik_Hub'],
@@ -71,7 +71,7 @@ const EDGE_PAIRS = [
 
 export const MOCK_EDGES = EDGE_PAIRS.map(([s, t]) => ({ source: s, target: t }))
 
-// ── BFS: shortest path between two nodes in the hub graph ─────────────────
+//  BFS: shortest path between two nodes in the hub graph 
 function bfsPath(origin, destination, edgePairs) {
   if (origin === destination) return [origin]
   const adj = {}
@@ -97,7 +97,7 @@ function bfsPath(origin, destination, edgePairs) {
   return [origin, destination] // fallback: direct
 }
 
-// ── Mock data factory (used when API is unavailable) ──────────────────────
+//  Mock data factory (used when API is unavailable) 
 export function makeMockData(injected = false, params = {}) {
   const origin      = params.origin      || 'Pune_Hub'
   const destination = params.destination || 'Mumbai_Hub'
@@ -172,7 +172,7 @@ export function makeMockData(injected = false, params = {}) {
   }
 }
 
-// ── API calls ────────────────────────────────────────────────────────────────
+//  API calls 
 export async function fetchData(params = {}) {
   try {
     const res = await client.get('/data', {

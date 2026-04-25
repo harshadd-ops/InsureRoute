@@ -106,7 +106,7 @@ export default function NewsPanel({ params = {} }) {
       {isFallback && (
         <div className="px-4 py-2 text-[11px] border-b border-amber-200 bg-amber-50 text-amber-800 flex items-center gap-2">
           <WifiOff size={12} />
-          <span>⚠ {fallbackMsg}</span>
+          <span> {fallbackMsg}</span>
         </div>
       )}
 

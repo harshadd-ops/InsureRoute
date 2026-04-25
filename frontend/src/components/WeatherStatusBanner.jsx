@@ -37,7 +37,7 @@ export default function WeatherStatusBanner() {
     return () => clearInterval(t)
   }, [])
 
-  // ── API / backend offline — render nothing ───────────────────────────────
+  //  API / backend offline — render nothing 
   if (error || !weather) return null
 
   const { is_dangerous, disruption_point, disruption_role, reason,
@@ -47,7 +47,7 @@ export default function WeatherStatusBanner() {
   const totalCount  = (checkpoints ?? []).length || 8
   const isOffline   = api_status === 'offline' || api_status === 'initialising'
 
-  // ── DANGEROUS — full red/amber banner ────────────────────────────────────
+  //  DANGEROUS — full red/amber banner 
   if (is_dangerous) {
     const roleLabel = disruption_role?.replace(/_/g, ' ') ?? ''
     return (
@@ -137,7 +137,7 @@ export default function WeatherStatusBanner() {
     )
   }
 
-  // ── CLEAR — small green pill ──────────────────────────────────────────────
+  //  CLEAR — small green pill 
   return (
     <motion.div
       key="clear-pill"

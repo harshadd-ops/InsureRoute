@@ -29,7 +29,7 @@ except ImportError:
 
 logger = logging.getLogger("insure_route.weather")
 
-# ── Pune-Mumbai route checkpoints ────────────────────────────────────────────
+#  Pune-Mumbai route checkpoints 
 CHECKPOINTS = [
     {"name": "Pune",        "lat": 18.5204, "lon": 73.8567, "role": "origin"},
     {"name": "Lonavla",     "lat": 18.7481, "lon": 73.4072, "role": "mountain_pass"},
@@ -121,14 +121,14 @@ def _parse_checkpoint(raw: dict, checkpoint: dict) -> dict:
     temperature  = float(raw.get("main", {}).get("temp", 25))
     humidity     = int(raw.get("main", {}).get("humidity", 50))
 
-    # ── Danger flag ─────────────────────────────────────────────────────────
+    #  Danger flag 
     is_dangerous = (
         (200 <= weather_id <= 622)
         or (rain_1h > 2.5)
         or (wind_speed > 10)
     )
 
-    # ── Severity score (0.0 – 1.0) ──────────────────────────────────────────
+    #  Severity score (0.0 – 1.0) 
     severity = 0.0
     if rain_1h > 2.5:
         severity += 0.3
@@ -230,7 +230,7 @@ def fetch_route_weather(path_nodes: Optional[list] = None) -> dict:
         result["last_checked"] = datetime.utcnow().isoformat()
         return result
 
-    # ── Find most severe dangerous checkpoint (excluding Bhiwandi alternate) ─
+    #  Find most severe dangerous checkpoint (excluding Bhiwandi alternate) 
     primary_cps = [c for c in parsed_checkpoints if c["role"] != "alternate_hub"]
     dangerous   = [c for c in primary_cps if c["is_dangerous"]]
     dangerous.sort(key=lambda c: c["severity"], reverse=True)

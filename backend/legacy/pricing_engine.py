@@ -15,7 +15,7 @@ Also computes before/after rerouting comparison.
 from dataclasses import dataclass, field
 from typing import Dict
 
-# ── Cargo type profiles with actuarial weighting ──────────────────────────────
+#  Cargo type profiles with actuarial weighting 
 # Each cargo type defines:
 #   base_rate        – fraction of cargo value × probability → base premium
 #   weather_weight   – sensitivity to rain/humidity (monsoon)
@@ -146,32 +146,32 @@ def compute_hedge(
 
     base_rate = profile["base_rate"]
 
-    # ── Weather multiplier (monsoon amplifies the cargo-specific sensitivity) ─
+    #  Weather multiplier (monsoon amplifies the cargo-specific sensitivity) 
     weather_mult = profile["weather_weight"] if monsoon else 1.0
 
-    # ── Temperature multiplier (active during monsoon or high-temp season) ────
+    #  Temperature multiplier (active during monsoon or high-temp season) 
     temp_mult = profile["temp_weight"] if monsoon else 1.0
 
-    # ── Perishable / spoilage multiplier ─────────────────────────────────────
+    #  Perishable / spoilage multiplier 
     perish_mult = profile["perishable_weight"]
 
-    # ── Fragility multiplier ─────────────────────────────────────────────────
+    #  Fragility multiplier 
     fragility_mult = profile["fragility_weight"]
 
-    # ── Value density multiplier ─────────────────────────────────────────────
+    #  Value density multiplier 
     value_density_mult = profile["value_density"]
 
-    # ── Composite cargo multiplier (geometric mean of cargo-specific factors) ─
+    #  Composite cargo multiplier (geometric mean of cargo-specific factors) 
     # This blends all cargo-specific risks into a single "cargo risk" factor
     cargo_composite = (
         perish_mult * fragility_mult * value_density_mult
     ) ** (1 / 3)  # geometric mean keeps the scale manageable
 
-    # ── Before rerouting ─────────────────────────────────────────────────────
+    #  Before rerouting 
     base_premium = cargo_value * disruption_probability * base_rate
     hedge_before = base_premium * weather_mult * temp_mult * cargo_composite
 
-    # ── After rerouting (probability drops) ──────────────────────────────────
+    #  After rerouting (probability drops) 
     prob_after = disruption_probability * (1 - post_reroute_prob_reduction)
     base_after = cargo_value * prob_after * base_rate
     hedge_after = base_after * weather_mult * temp_mult * cargo_composite
@@ -200,7 +200,7 @@ def compute_hedge(
     )
 
 
-# ── Demo scenario (Pune → Mumbai) ────────────────────────────────────────────
+#  Demo scenario (Pune → Mumbai) 
 DEMO_SCENARIO = dict(
     cargo_value=70_000,
     disruption_probability=0.78,   # high risk

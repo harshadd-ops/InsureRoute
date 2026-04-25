@@ -19,7 +19,7 @@ export default function Navbar({ isLive, isMock, disrupted, params, onParamsChan
       className="relative z-50 flex items-center justify-between px-6 py-3
                  border-b border-border bg-white shadow-sm"
     >
-      {/* ── Left: Logo ── */}
+      {/*  Left: Logo  */}
       <div className="flex items-center gap-3">
         <div className={`p-1.5 rounded-lg ${disrupted ? 'bg-danger/10 text-danger' : 'bg-primary/10 text-primary'}`}>
           <Shield size={20} />
@@ -37,7 +37,7 @@ export default function Navbar({ isLive, isMock, disrupted, params, onParamsChan
         </div>
       </div>
 
-      {/* ── Right: Controls ── */}
+      {/*  Right: Controls  */}
       <div className="flex items-center gap-3 relative">
         <label className="flex items-center gap-2 text-xs font-semibold text-text cursor-pointer hover:bg-slate-50 px-2 py-1 rounded border border-transparent hover:border-border transition-all">
           <input type="checkbox" checked={params.monsoon} onChange={() => toggle('monsoon')} className="accent-primary" />

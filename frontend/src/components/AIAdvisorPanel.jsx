@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import { fetchRiskAnalysis } from '../services/api'
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+//  Helpers 
 function statusColor(status = '') {
   const s = status.toLowerCase()
   if (s.includes('green') || s.includes('safe'))      return { bg: '#dcfce7', text: '#166534', border: '#86efac', dot: '#22c55e' }
@@ -38,7 +38,7 @@ function renderBullets(text = '') {
     const val = rest.join(':').trim()
     return (
       <div key={i} className="flex items-start gap-2 text-[12px] py-1">
-        <span style={{ color: '#6366f1', marginTop: 2 }}>▸</span>
+        <span style={{ color: '#6366f1', marginTop: 2 }}></span>
         {isLabel && val ? (
           <span>
             <span style={{ color: '#374151', fontWeight: 600 }}>{label.trim()}:</span>
@@ -52,7 +52,7 @@ function renderBullets(text = '') {
   })
 }
 
-// ── Segment Card ──────────────────────────────────────────────────────────────
+//  Segment Card 
 function SegmentCard({ seg, index, isCritical }) {
   const [expanded, setExpanded] = useState(index === 0)
   const sb = safetyBadge(seg.safety_rating)
@@ -164,7 +164,7 @@ function SegmentCard({ seg, index, isCritical }) {
   )
 }
 
-// ── Main Panel ─────────────────────────────────────────────────────────────────
+//  Main Panel 
 export default function AIAdvisorPanel({ params, isMock, routePath = [], weatherState }) {
   const [analysis,  setAnalysis]  = useState(null)
   const [loading,   setLoading]   = useState(false)
@@ -218,7 +218,7 @@ export default function AIAdvisorPanel({ params, isMock, routePath = [], weather
       className="glass flex flex-col"
       style={{ minHeight: 0 }}
     >
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      {/*  Header  */}
       <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-border">
         <div className="flex items-center gap-2">
           <div className="p-1.5 rounded-lg bg-indigo-50">
@@ -278,7 +278,7 @@ export default function AIAdvisorPanel({ params, isMock, routePath = [], weather
         </div>
       </div>
 
-      {/* ── Body ───────────────────────────────────────────────────────────── */}
+      {/*  Body  */}
       <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5 custom-scrollbar">
         <AnimatePresence mode="wait">
 
@@ -365,7 +365,7 @@ export default function AIAdvisorPanel({ params, isMock, routePath = [], weather
 
               {isAvailable && (
                 <>
-                  {/* ── 1. Quick Decision Banner ─────────────────────────────── */}
+                  {/*  1. Quick Decision Banner  */}
                   {analysis.quick_decision && (
                     <motion.div
                       initial={{ scale: 0.97 }}
@@ -385,7 +385,7 @@ export default function AIAdvisorPanel({ params, isMock, routePath = [], weather
                     </motion.div>
                   )}
 
-                  {/* ── 2. Route Summary ─────────────────────────────────────── */}
+                  {/*  2. Route Summary  */}
                   {analysis.route_summary && (
                     <div>
                       <SectionHeader icon={<Navigation size={13} />} label="Route Summary" color="indigo" />
@@ -395,7 +395,7 @@ export default function AIAdvisorPanel({ params, isMock, routePath = [], weather
                     </div>
                   )}
 
-                  {/* ── 3. Segment-by-Segment Analysis ───────────────────────── */}
+                  {/*  3. Segment-by-Segment Analysis  */}
                   {segments.length > 0 && (
                     <div>
                       <SectionHeader
@@ -419,7 +419,7 @@ export default function AIAdvisorPanel({ params, isMock, routePath = [], weather
                     </div>
                   )}
 
-                  {/* ── 4. Critical Segment ───────────────────────────────────── */}
+                  {/*  4. Critical Segment  */}
                   {criticalName && (
                     <div>
                       <SectionHeader icon={<AlertCircle size={13} />} label="Most Critical Segment" color="red" />
@@ -450,7 +450,7 @@ export default function AIAdvisorPanel({ params, isMock, routePath = [], weather
                     </div>
                   )}
 
-                  {/* ── 5. Recommendations ───────────────────────────────────── */}
+                  {/*  5. Recommendations  */}
                   {analysis.recommendations && (
                     <div>
                       <SectionHeader icon={<Star size={13} />} label="Smart Recommendations" color="green" />
@@ -460,7 +460,7 @@ export default function AIAdvisorPanel({ params, isMock, routePath = [], weather
                     </div>
                   )}
 
-                  {/* ── 6. Live Status ────────────────────────────────────────── */}
+                  {/*  6. Live Status  */}
                   {analysis.live_status && (
                     <div>
                       <SectionHeader icon={<Radio size={13} />} label="Live Intelligence Status" color="amber" />
@@ -470,7 +470,7 @@ export default function AIAdvisorPanel({ params, isMock, routePath = [], weather
                     </div>
                   )}
 
-                  {/* ── Footer ────────────────────────────────────────────────── */}
+                  {/*  Footer  */}
                   <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                     <div className="flex items-center gap-1.5">
                       <Sparkles size={10} className="text-indigo-400" />
@@ -495,7 +495,7 @@ export default function AIAdvisorPanel({ params, isMock, routePath = [], weather
   )
 }
 
-// ── Section header sub-component ──────────────────────────────────────────────
+//  Section header sub-component 
 function SectionHeader({ icon, label, color = 'indigo' }) {
   const colors = {
     indigo: { bg: '#eef2ff', text: '#4338ca', border: '#c7d2fe' },

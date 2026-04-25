@@ -4,7 +4,7 @@ We are thrilled that you want to contribute to **InsureRoute**! Our goal is to b
 
 ---
 
-## 🚀 How You Can Help
+##  How You Can Help
 You can contribute in several ways:
 - **Code:** Bug fixes, feature additions, performance optimizations.
 - **AI/ML:** Improving the Isolation Forest model or enhancing Gemini prompts for better operational advisory.
@@ -13,7 +13,7 @@ You can contribute in several ways:
 
 ---
 
-## 🛠️ Development Setup
+## ️ Development Setup
 
 ### Prerequisites
 - Python 3.10+
@@ -48,7 +48,7 @@ npm run dev
 
 ---
 
-## 📐 Engineering Standards
+##  Engineering Standards
 
 To ensure the system remains enterprise-grade, please adhere to the following:
 
@@ -59,7 +59,7 @@ To ensure the system remains enterprise-grade, please adhere to the following:
 
 ---
 
-## 🐛 Reporting Issues
+##  Reporting Issues
 
 If you find a bug, please open a GitHub Issue containing:
 1. A clear, descriptive title.
@@ -69,5 +69,5 @@ If you find a bug, please open a GitHub Issue containing:
 
 ---
 
-## ⚖️ License
+## ️ License
 By contributing, you agree that your contributions will be licensed under the project's MIT License. Thank you for building the future of InsurTech and logistics with us!

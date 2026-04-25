@@ -23,7 +23,7 @@ from core.gemini_guard import call_gemini_with_guard
 
 logger = logging.getLogger("insure_route.route_risk_advisor")
 
-# ── Load .env from repo root and backend/.env ─────────────────────────────────
+#  Load .env from repo root and backend/.env 
 try:
     try:
         from env_loader import load_insure_route_env
@@ -40,17 +40,17 @@ except ImportError:
     REQUESTS_AVAILABLE = False
     logger.warning("requests not installed — Route Risk Advisor disabled")
 
-# ── Configuration ─────────────────────────────────────────────────────────────
+#  Configuration 
 _API_BASE   = "https://generativelanguage.googleapis.com/v1beta/models"
 _MODEL_NAME = "gemini-2.5-flash"
 _CACHE_TTL  = 60     # seconds
 _MAX_TOKENS = 2500   # full detailed analysis — raised for segment coverage
 
-# ── In-process response cache ─────────────────────────────────────────────────
+#  In-process response cache 
 _cache: dict = {}
 
 
-# ── System Prompt ─────────────────────────────────────────────────────────────
+#  System Prompt 
 _SYSTEM_PROMPT = """You are InsureRoute AI, a real-world intelligent navigation risk advisor.
 
 Generate a DETAILED, STRUCTURED risk analysis for the route provided.
@@ -92,7 +92,7 @@ Use EXACTLY this section format (keep each segment analysis brief — 1 line per
 IMPORTANT: You MUST write a ### segment block for EVERY checkpoint in the data. Be concise per bullet (max 15 words). Do not skip any checkpoint."""
 
 
-# ── Checkpoint data builder ────────────────────────────────────────────────────
+#  Checkpoint data builder 
 def _build_checkpoint_section(checkpoints: list) -> str:
     """Format checkpoint data into a readable prompt section."""
     if not checkpoints:
@@ -117,7 +117,7 @@ def _build_checkpoint_section(checkpoints: list) -> str:
     return "\n".join(lines)
 
 
-# ── Prompt builder ─────────────────────────────────────────────────────────────
+#  Prompt builder 
 def _build_prompt(context: dict) -> str:
     origin      = context.get("origin", "Origin")
     destination = context.get("destination", "Destination")
@@ -168,7 +168,7 @@ def _build_prompt(context: dict) -> str:
     return "\n".join(lines)
 
 
-# ── Cache fingerprint ──────────────────────────────────────────────────────────
+#  Cache fingerprint 
 def _fingerprint(context: dict) -> str:
     key = {
         "origin":      context.get("origin"),
@@ -183,7 +183,7 @@ def _fingerprint(context: dict) -> str:
     return hashlib.md5(json.dumps(key, sort_keys=True).encode()).hexdigest()
 
 
-# ── REST call ──────────────────────────────────────────────────────────────────
+#  REST call 
 def _call_gemini(api_key: str, prompt: str) -> str:
     def _request():
         url = f"{_API_BASE}/{_MODEL_NAME}:generateContent"
@@ -205,7 +205,7 @@ def _call_gemini(api_key: str, prompt: str) -> str:
     return result
 
 
-# ── Response parser ────────────────────────────────────────────────────────────
+#  Response parser 
 def _parse_response(text: str) -> dict:
     """
     Parse the structured Gemini response into a JSON-serialisable dict.
@@ -235,7 +235,7 @@ def _parse_response(text: str) -> dict:
         stripped = line.strip()
         cleaned  = _clean(stripped).upper()
 
-        # ── Section headers ─────────────────────────────────────────────────
+        #  Section headers 
         if cleaned.startswith("## ROUTE SUMMARY"):
             current_section = "route_summary"
             current_segment = None
@@ -258,7 +258,7 @@ def _parse_response(text: str) -> dict:
             current_section = "live_status"
             continue
 
-        # ── Sub-section: individual segment ─────────────────────────────────
+        #  Sub-section: individual segment 
         if current_section == "segment_analysis" and _clean(stripped).startswith("### "):
             if current_segment and segment_buffer:
                 sections["segments"].append(dict(segment_buffer))
@@ -275,13 +275,13 @@ def _parse_response(text: str) -> dict:
             sections["segment_analysis"] += f"\n### {seg_name}\n"
             continue
 
-        # ── Skip blank lines ─────────────────────────────────────────────────
+        #  Skip blank lines 
         if not stripped:
             if current_section in ("route_summary", "segment_analysis", "recommendations", "live_status"):
                 sections[current_section] += "\n"
             continue
 
-        # ── Content routing ──────────────────────────────────────────────────
+        #  Content routing 
         if current_section == "route_summary":
             sections["route_summary"] += stripped + "\n"
 
@@ -338,7 +338,7 @@ def _parse_response(text: str) -> dict:
     return sections
 
 
-# ── Seeded weather simulation for non-live routes ─────────────────────────────
+#  Seeded weather simulation for non-live routes 
 def _seeded_checkpoint(node_id: str, index: int, total: int) -> dict:
     """Generate deterministic mock weather for a hub node."""
     h = 0
@@ -370,7 +370,7 @@ def _seeded_checkpoint(node_id: str, index: int, total: int) -> dict:
     }
 
 
-# ── Public API ─────────────────────────────────────────────────────────────────
+#  Public API 
 def get_route_risk_analysis(context: dict) -> dict:
     """
     Generate a full structured route risk analysis.
@@ -415,7 +415,7 @@ def get_route_risk_analysis(context: dict) -> dict:
         or "Mumbai" in origin and "Pune" in destination
     )
 
-    # ── Select checkpoint data source ─────────────────────────────────────────
+    #  Select checkpoint data source 
     if is_pune_mumbai and live_checkpoints:
         checkpoints = live_checkpoints
         data_source = "Live OpenWeatherMap API"
@@ -437,13 +437,13 @@ def get_route_risk_analysis(context: dict) -> dict:
     fp  = _fingerprint(enriched_context)
     now = time.monotonic()
 
-    # ── Cache hit ─────────────────────────────────────────────────────────────
+    #  Cache hit 
     if fp in _cache and (now - _cache[fp]["ts"]) < _CACHE_TTL:
         result = dict(_cache[fp]["result"])
         result["cached"] = True
         return result
 
-    # ── Cache miss → call Gemini ──────────────────────────────────────────────
+    #  Cache miss → call Gemini 
     try:
         prompt = _build_prompt(enriched_context)
         text   = _call_gemini(api_key, prompt)

@@ -131,7 +131,7 @@ function CheckpointDot({ cp, index, isActive, showBypass, firstDangerIdx }) {
             className="absolute -top-2 -right-2 text-red-400 font-bold text-xs leading-none"
             title="Route blocked"
           >
-            ✕
+            
           </div>
         )}
         {/* Tooltip */}
@@ -269,7 +269,7 @@ export default function RouteTimeline({ checkpoints: propCheckpoints, isDisrupte
         </div>
       </div>
 
-      {/* ── Main route row ──────────────────────────────────────────────── */}
+      {/*  Main route row  */}
       <div className="flex items-center w-full pb-2 pt-6" style={{ minHeight: 90 }}>
         {mainRoute.map((cp, i) => {
           const isBlocked = showBypass && i >= firstDangerIdx && i < mainRoute.length - 1
@@ -291,7 +291,7 @@ export default function RouteTimeline({ checkpoints: propCheckpoints, isDisrupte
         })}
       </div>
 
-      {/* ── Bypass route (only when disruption active) ──────────────────── */}
+      {/*  Bypass route (only when disruption active)  */}
       {showBypass && bhiwandi && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
@@ -323,7 +323,7 @@ export default function RouteTimeline({ checkpoints: propCheckpoints, isDisrupte
         </motion.div>
       )}
 
-      {/* ── All-clear state ─────────────────────────────────────────────── */}
+      {/*  All-clear state  */}
       {!isDisrupted && (
         <div className="mt-2 flex items-center gap-2 text-xs text-green-400/70">
           <div className="w-1.5 h-1.5 rounded-full bg-green-500" style={{ animation: 'ping 2s infinite' }} />

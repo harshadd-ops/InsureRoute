@@ -9,7 +9,7 @@ export default function RouteIntelligence() {
   const { shipmentId } = useParams();
   const navigate = useNavigate();
 
-  // ── existing state ──────────────────────────────────────────────────────────
+  //  existing state 
   const [chatInput, setChatInput] = useState('');
   const [chatHistory, setChatHistory] = useState([
     { role: 'agent', content: 'Analyzing multi-modal route options for your shipment. How can I help optimize this?' }
@@ -17,12 +17,12 @@ export default function RouteIntelligence() {
   const [selectedRouteId, setSelectedRouteId] = useState(null);
   const chatEndRef = useRef(null);
 
-  // ── new state for Know More drawer ─────────────────────────────────────────
+  //  new state for Know More drawer 
   const [knowMoreRoute, setKnowMoreRoute] = useState(null);
   const [insights, setInsights] = useState(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
 
-  // ── queries ────────────────────────────────────────────────────────────────
+  //  queries 
   const { data: routeOptions, isLoading: loadingRoutes } = useQuery({
     queryKey: ['routeOptions', shipmentId],
     queryFn: () => getRouteOptions(shipmentId)
@@ -74,7 +74,7 @@ export default function RouteIntelligence() {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatHistory]);
 
-  // ── Gemini call when knowMoreRoute changes ─────────────────────────────────
+  //  Gemini call when knowMoreRoute changes 
   useEffect(() => {
     if (!knowMoreRoute) return;
     setInsights(null);
@@ -84,7 +84,7 @@ export default function RouteIntelligence() {
 
 You have received LIVE sensor data from OpenWeatherMap across all route checkpoints, live news from NewsData API, and actuarial insurance data. Use ONLY the numbers below. Never invent data.
 
-━━━ ROUTE ━━━
+ ROUTE 
 Route ID        : ${knowMoreRoute.route_id}
 Modes           : ${knowMoreRoute.modes.join(' → ')}
 Path            : ${knowMoreRoute.path?.join(' → ') || 'N/A'}
@@ -95,8 +95,8 @@ System Pick     : ${knowMoreRoute.isBest ? 'Yes — Recommended' : 'No'}
 Market Trend    : ${knowMoreRoute.market_trend ? `${knowMoreRoute.market_trend.label} (${knowMoreRoute.market_trend.delta_pct > 0 ? '+' : ''}${knowMoreRoute.market_trend.delta_pct}%) driven by ${knowMoreRoute.market_trend.driver}` : 'N/A'}
 Active Alerts   : ${disruptions?.map(d => d.checkpoint_id).join(', ') || 'None'}
 
-━━━ LIVE WEATHER (OpenWeatherMap) ━━━
-Overall Status  : ${weatherData?.is_dangerous ? '🔴 DANGEROUS' : '🟢 CLEAR'}
+ LIVE WEATHER (OpenWeatherMap) 
+Overall Status  : ${weatherData?.is_dangerous ? ' DANGEROUS' : '🟢 CLEAR'}
 Last Polled     : ${weatherData?.last_checked || 'Unknown'}
 Auto-Reroute Via: ${weatherData?.alternate_route_via || 'N/A'}
 
@@ -105,15 +105,15 @@ Checkpoint : ${cp.name} (${cp.role?.replace(/_/g, ' ')})
 Condition  : ${cp.description}
 Temp       : ${cp.temperature}°C | Humidity: ${cp.humidity}%
 Rain       : ${cp.rain_1h ?? 0} mm/hr | Wind: ${cp.wind_speed ?? 0} m/s
-Severity   : ${Math.round((cp.severity ?? 0) * 100)}% | Dangerous: ${cp.is_dangerous ? 'YES ⚠️' : 'No'}
+Severity   : ${Math.round((cp.severity ?? 0) * 100)}% | Dangerous: ${cp.is_dangerous ? 'YES ️' : 'No'}
 `).join('---') || 'No live checkpoint data available.'}
 
-━━━ LIVE NEWS (NewsData API) ━━━
+ LIVE NEWS (NewsData API) 
 ${(newsData?.news || []).filter(n => (n.relevance_score || 0) >= 0.4).slice(0, 4).map(n =>
   `- "${n.title}" | Source: ${n.source} | Relevance: ${(n.relevance_score || 0).toFixed(2)} | Location: ${n.location_tag || 'Route Corridor'} | Published: ${n.published_at || 'Recent'}`
 ).join('\n') || 'No high-relevance news for this corridor right now.'}
 
-━━━ INSURANCE (Actuarial Engine) ━━━
+ INSURANCE (Actuarial Engine) 
 Cargo Type              : ${knowMoreRoute.cargo_type || 'Standard'}
 Cargo Value             : ₹${knowMoreRoute.cargo_value_inr?.toLocaleString('en-IN') || 'N/A'}
 Premium (Standard Route): ₹${knowMoreRoute.insurance?.before_cost?.toLocaleString('en-IN') || 'N/A'}
@@ -125,7 +125,7 @@ Fragility Multiplier    : x${knowMoreRoute.insurance?.fragility_multiplier?.toFi
 Value Density Multiplier: x${knowMoreRoute.insurance?.value_density_multiplier?.toFixed(2) || '1.00'}
 Composite Cargo Risk    : x${knowMoreRoute.insurance?.cargo_multiplier?.toFixed(2) || '1.00'}
 
-━━━ YOUR TASK ━━━
+ YOUR TASK 
 Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JSON.
 
 {
@@ -166,7 +166,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
       .finally(() => setLoadingInsights(false));
   }, [knowMoreRoute]);
 
-  // ── map data ───────────────────────────────────────────────────────────────
+  //  map data 
   const ROUTE_COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6'];
 
   const mapData = useMemo(() => {
@@ -243,7 +243,7 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
 
   return (
     <>
-      {/* ── Main three-column grid ─────────────────────────────────────────── */}
+      {/*  Main three-column grid  */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-100px)]">
 
         {/* LEFT: Route Options */}
@@ -408,9 +408,9 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
         </div>
       </div>
 
-      {/* ── Know More Drawer ──────────────────────────────────────────────────── */}
+      {/*  Know More Drawer  */}
       {knowMoreRoute && (
-        <div className="fixed inset-0 z-50 flex justify-end">
+        <div className="fixed inset-0 z-[9999] flex justify-end">
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"

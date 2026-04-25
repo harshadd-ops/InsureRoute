@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { useEffect, useRef } from 'react'
 import { Shield, ArrowRight, DollarSign, Package } from 'lucide-react'
 
-// ── Cargo type color & icon mapping ──────────────────────────────────────────
+//  Cargo type color & icon mapping 
 const CARGO_THEME = {
   'Standard':         { color: '#64748b', bg: 'bg-slate-100', border: 'border-slate-200', text: 'text-slate-700' },
   'Electronics':      { color: '#6366f1', bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700' },

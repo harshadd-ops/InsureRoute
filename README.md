@@ -13,14 +13,14 @@
 
 ---
 
-## 🌍 The Global Challenge
+##  The Global Challenge
 Global logistics networks are highly fragile, and current cargo insurance models are incredibly rigid. When sudden disruptions occur (severe weather, port strikes, local accidents), shippers suffer millions in losses, while underwriters struggle to accurately price these dynamic risks.
 
 * **Reactive Routing:** Alternate paths are only found after the delay happens.
 * **Static Insurance:** Organisations pay the same premium regardless of whether the transport crosses a clear highway or a flooded monsoon zone.
 * **Data Fragmentation:** The data required to fix this exists but is scattered across separate systems with no unified view for risk managers.
 
-## 💡 Our Solution
+##  Our Solution
 **InsureRoute** bridges the gap between predictive routing and financial hedging. It is an enterprise-grade platform that operates on three integrated intelligence layers:
 
 1. **Machine Learning Anomaly Detection:** An Isolation Forest model continuously analyses multi-variate transit data (weather severity, historical delays, vehicle telemetry) to predict disruptions before they occur.
@@ -31,7 +31,7 @@ Upon detecting an anomaly, our NetworkX graph algorithm recalculates the safest 
 
 ---
 
-## 🎯 UN Sustainable Development Goals Alignment
+##  UN Sustainable Development Goals Alignment
 InsureRoute directly tackles major global challenges:
 
 * **SDG 9 — Industry, Innovation and Infrastructure:** Builds resilient logistics infrastructure through predictive AI, enabling supply chains to withstand and adapt to disruptions before they impact delivery timelines.
@@ -40,7 +40,7 @@ InsureRoute directly tackles major global challenges:
 
 ---
 
-## 🚀 Key Features
+##  Key Features
 
 * **Real-Time Anomaly Detection:** Isolation Forest model predicting delays from multi-variate factors including weather, historical tracking, and time-series patterns.
 * **Live Weather Monitoring:** Real-time polling via OpenWeatherMap API with automatic severity classification and disruption triggering.
@@ -53,14 +53,14 @@ InsureRoute directly tackles major global challenges:
 
 ---
 
-## 📊 Impact Metrics
+##  Impact Metrics
 * **Financial Savings:** Dynamic premium arbitrage saves companies thousands per shipment by avoiding high-risk zones.
 * **CO2 Reduction:** Verifiable Scope 3 emissions offset calculations by avoiding gridlock and selecting optimal multimodal paths.
 * **Risk Mitigation:** Averting catastrophic shocks by intercepting weather and traffic anomalies before cargo enters the danger zone.
 
 ---
 
-## ☁️ Google Technology Integration
+## ️ Google Technology Integration
 
 InsureRoute is built to scale on Google Cloud and leverages cutting-edge AI:
 
@@ -75,7 +75,7 @@ The Gemini AI advisor receives the full shipment context (anomaly scores, weathe
 
 ---
 
-## 📈 Scalability & 🔮 Future Scope
+##  Scalability &  Future Scope
 
 InsureRoute is designed as a foundational platform capable of massive global expansion:
 
@@ -87,7 +87,7 @@ InsureRoute is designed as a foundational platform capable of massive global exp
 
 ---
 
-## 💻 Tech Stack
+##  Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -101,7 +101,7 @@ InsureRoute is designed as a foundational platform capable of massive global exp
 
 ---
 
-## 🛠️ Quick Start
+## ️ Quick Start
 
 ### Prerequisites
 - Python 3.10+
@@ -140,14 +140,14 @@ npm run dev
 
 ---
 
-## 🏗️ Architecture & Deployment
+## ️ Architecture & Deployment
 * **System Architecture:** Deep dive into how our microservices interact. Read [system_architecture.md](system_architecture.md).
 * **Deployment Guide:** Step-by-step instructions for deploying to Google Cloud. Read [deployment_guide.md](deployment_guide.md).
 
 ---
 
-## 👥 Team
+##  Team
 Developed by **HoloSquad** for the Google Solution Challenge 2026.
 
-## 📄 License
+##  License
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.

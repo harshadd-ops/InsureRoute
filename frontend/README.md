@@ -4,7 +4,7 @@ This is the enterprise-grade React dashboard for **InsureRoute**, serving as the
 
 ---
 
-## ⚡ Tech Stack
+##  Tech Stack
 
 - **Framework:** React 18
 - **Build Tool:** Vite (for ultra-fast HMR and optimized production builds)
@@ -16,7 +16,7 @@ This is the enterprise-grade React dashboard for **InsureRoute**, serving as the
 
 ---
 
-## 🚀 Architecture & Components
+##  Architecture & Components
 
 The frontend is fully decoupled from the mathematical processing layer, acting exclusively as a real-time digital twin.
 
@@ -28,7 +28,7 @@ Key components include:
 
 ---
 
-## 🛠️ Development Setup
+## ️ Development Setup
 
 1. Install dependencies:
    ```bash
@@ -47,7 +47,7 @@ Key components include:
 
 ---
 
-## ☁️ Deployment
+## ️ Deployment
 
 This frontend is optimized for edge delivery and serverless environments. It can be instantly containerized and deployed to **Google Cloud Run** or pushed globally via **Firebase Hosting**.
 
