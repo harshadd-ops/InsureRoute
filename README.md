@@ -103,7 +103,19 @@ The Gemini AI advisor receives the full shipment context (anomaly scores, weathe
 5. Gemini AI analyses the full context and generates advisory
 6. Complete JSON response rendered across all dashboard panels
 
-## 7. Project Structure
+## 7. Dynamic Actuarial Pricing
+
+InsureRoute features an actuarial-grade pricing engine that calculates insurance premiums in real-time based on 5 dynamic factors:
+
+1. **Transport Mode Base Rate:** Different modes carry different baseline risks (Rail: 0.15%, Air: 0.20%, Sea: 0.25%, Road: 0.30%).
+2. **Route Risk Score:** A composite 0.0-1.0 score computed from ML predictions, live OpenWeatherMap data, and active IoT disruptions. High-risk routes are exponentially penalized (up to 3.2x loading).
+3. **Cargo Type Multiplier:** Different cargo carries inherent risk (Perishables: 1.8x, Pharmaceuticals: 1.6x, Chemicals: 1.5x, Electronics: 1.4x, FMCG: 1.1x, Auto: 1.0x, Textiles: 0.9x).
+4. **Coverage Multiplier:** Basic (1.0x), Comprehensive (1.6x), All Risk (2.2x).
+5. **Cargo Value:** Premium scales linearly with declared cargo value.
+
+**Formula:** `Premium = Cargo Value × Base Rate × Risk Loading × Cargo Multiplier × Coverage Multiplier`
+
+## 8. Project Structure
 
 ```text
 InsureRoute/
@@ -150,7 +162,7 @@ InsureRoute/
 └── LICENSE                   # MIT License
 ```
 
-## 8. Installation and Setup
+## 9. Installation and Setup
 
 ### Prerequisites
 - Python 3.10 or higher
@@ -203,7 +215,7 @@ npm run dev
 
 The application will be available at `http://localhost:3000`.
 
-## 9. Demo Flow
+## 10. Demo Flow
 
 1. **Baseline State:** The dashboard loads and begins polling data automatically. The network graph shows optimal routing, KPIs display normal risk levels, and the insurance panel shows baseline premiums.
 2. **Live Weather Detection:** If any of the 8 Pune-Mumbai checkpoints detect dangerous weather (heavy rain, high wind, thunderstorms), the system automatically triggers disruption handling without user intervention.
@@ -211,17 +223,17 @@ The application will be available at `http://localhost:3000`.
 4. **System Response:** Upon disruption, KPIs turn red, the anomaly banner appears, the graph reroutes cargo via alternate hubs, and the insurance panel shows the exact financial savings from the safer route.
 5. **AI Advisory:** The Gemini-powered advisor panel provides a natural language risk summary with actionable recommendations specific to the current shipment context.
 
-## 10. Future Scope
+## 11. Future Scope
 
 - **Agentic AI and LLMs:** Processing unstructured text from breaking news and social media feeds into structured risk modifiers using Gemini's multi-modal capabilities.
 - **Live IoT Edge Telemetry:** Direct integration with cellular OBD2 truck sensors and Thermo King reefer units via high-throughput message queues.
 - **Graph Neural Networks:** Upgrading to GNNs for predicting cascading, multi-node supply chain failures beyond localised edge disruptions.
 - **Google Cloud Deployment:** Full cloud-native deployment on Google Cloud Run with Cloud SQL for persistent analytics and Vertex AI for model serving.
 
-## 11. Team
+## 12. Team
 
 Developed by **HoloSquad** for the Google Solution Challenge 2026.
 
-## 12. License
+## 13. License
 
 This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.

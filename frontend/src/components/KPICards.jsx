@@ -1,6 +1,6 @@
 import { motion, animate } from 'framer-motion'
 import { useEffect, useRef } from 'react'
-import { AlertTriangle, Clock, TrendingUp, PiggyBank } from 'lucide-react'
+import { AlertTriangle, Shield, Cloud, PiggyBank } from 'lucide-react'
 
 function AnimatedNumber({ value, prefix = '', suffix = '', decimals = 1, className = '' }) {
   const ref = useRef(null)
@@ -26,45 +26,48 @@ function AnimatedNumber({ value, prefix = '', suffix = '', decimals = 1, classNa
 
 const CARDS = [
   {
-    key: 'sla',
-    label: 'SLA Breach Rate',
-    suffix: '%',
-    icon: AlertTriangle,
-    accent: 'border-t-danger',
-    iconColor: 'text-danger',
-    desc: 'of total shipments',
-    threshold: (v) => v > 10 ? 'danger' : v > 5 ? 'warning' : 'success',
-  },
-  {
-    key: 'delay',
-    label: 'Avg Delay',
-    suffix: '%',
-    prefix: '+',
-    icon: Clock,
-    accent: 'border-t-warning',
-    iconColor: 'text-warning',
-    desc: 'vs scheduled transit',
-    threshold: (v) => v > 15 ? 'danger' : v > 7 ? 'warning' : 'success',
-  },
-  {
-    key: 'risk',
-    label: 'Current Risk',
-    suffix: '%',
-    icon: TrendingUp,
+    key: 'cargo_value', // Map to a new key or use 'sla' if parent passes it
+    label: 'Gross Cargo Value Shielded',
+    suffix: '',
+    prefix: '₹',
+    icon: Shield,
     accent: 'border-t-primary',
     iconColor: 'text-primary',
-    desc: 'system probability',
-    threshold: (v) => v > 60 ? 'danger' : v > 30 ? 'warning' : 'success',
+    desc: 'At-risk capital secured',
+    threshold: () => 'success',
   },
   {
-    key: 'savings',
-    label: 'Cost Savings',
-    suffix: '%',
+    key: 'co2',
+    label: 'Verified Scope 3 CO2 Offset',
+    suffix: ' kg',
+    prefix: '',
+    icon: Cloud,
+    accent: 'border-t-success',
+    iconColor: 'text-success',
+    desc: 'Equivalent to 3 trucks off road',
+    threshold: () => 'success',
+  },
+  {
+    key: 'premium_savings',
+    label: 'Actuarial Premium Arbitrage',
+    suffix: '',
+    prefix: '₹',
     icon: PiggyBank,
     accent: 'border-t-success',
     iconColor: 'text-success',
-    desc: 'via active rerouting',
+    desc: 'Real-time reduction applied',
     threshold: () => 'success',
+  },
+  {
+    key: 'shocks_averted',
+    label: 'Catastrophic Shocks Averted',
+    suffix: '',
+    prefix: '',
+    icon: AlertTriangle,
+    accent: 'border-t-warning',
+    iconColor: 'text-warning',
+    desc: 'High-severity disruptions bypassed',
+    threshold: () => 'warning',
   },
 ]
 
@@ -75,10 +78,10 @@ const LEVEL_STYLES = {
 }
 
 export default function KPICards({ kpis }) {
-  const safeKpis = kpis || { sla: 0, delay: 0, risk: 0, savings: 0 }
+  const safeKpis = kpis || { cargo_value: 0, co2: 0, premium_savings: 0, shocks_averted: 0 }
 
   return (
-    <div className="flex flex-col gap-3 md:gap-4 h-full">
+    <div className="flex gap-3 md:gap-4 w-full">
       {CARDS.map((card, i) => {
         const value = safeKpis[card.key] ?? 0
         const level = card.threshold(value)
@@ -104,7 +107,7 @@ export default function KPICards({ kpis }) {
                 value={value}
                 prefix={card.prefix || ''}
                 suffix={card.suffix}
-                decimals={1}
+                decimals={value > 100 ? 0 : 1}
               />
             </div>
             

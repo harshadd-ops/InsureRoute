@@ -25,6 +25,11 @@
     {"from": "CP06", "to": "CP07", "distance_km": 15, "mode": "road", "base_time_min": 22, "alt_route": false},
     {"from": "CP07", "to": "CP08", "distance_km": 10, "mode": "road", "base_time_min": 18, "alt_route": false},
     {"from": "CP08", "to": "MUMBAI_DEST", "distance_km": 5, "mode": "road", "base_time_min": 12, "alt_route": false},
+    
+    {"from": "CP02", "to": "CP04", "distance_km": 52, "mode": "road", "base_time_min": 75, "alt_route": true, "label": "Direct Bypass"},
+    {"from": "CP05", "to": "CP07", "distance_km": 35, "mode": "road", "base_time_min": 50, "alt_route": true, "label": "Panvel Bypass"},
+    {"from": "PUNE_DEPOT", "to": "CP03", "distance_km": 42, "mode": "road", "base_time_min": 60, "alt_route": true, "label": "Express Link"},
+
     {"from": "PUNE_DEPOT", "to": "RN01", "distance_km": 3, "mode": "road", "base_time_min": 8, "alt_route": false},
     {"from": "RN01", "to": "RN02", "distance_km": 192, "mode": "rail", "base_time_min": 210, "alt_route": true},
     {"from": "RN02", "to": "MUMBAI_DEST", "distance_km": 5, "mode": "road", "base_time_min": 15, "alt_route": true},

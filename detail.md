@@ -1,249 +1,472 @@
-# InsureRoute: Smart Supply Chain Disruption Detection and Dynamic Insurance Pricing
+# InsureRoute — Comprehensive Technical Documentation
 
-**Comprehensive technical documentation covering machine learning anomaly detection, live weather intelligence, Google Gemini AI advisory, algorithmic routing, and actuarial pricing for enterprise-scale logistics disruption management.**
+**Smart Supply Chain Disruption Detection and Dynamic Insurance Pricing**
+Predictive AI-powered logistics intelligence with real-time weather monitoring, algorithmic rerouting, ML risk scoring, and actuarial-grade dynamic pricing.
 
 ---
 
 ## 1. Executive Summary
 
-**InsureRoute** is a predictive supply chain intelligence platform that fuses machine learning anomaly detection, live weather monitoring, Google Gemini AI advisory, algorithmic graph routing, and dynamic actuarial pricing into a single unified system. Built to address the fragility of modern logistics networks, InsureRoute transforms reactive disruption management into proactive risk mitigation.
+**InsureRoute** is a predictive supply chain intelligence platform that fuses machine learning risk scoring, live weather monitoring, Google Gemini AI advisory, multimodal graph routing, and dynamic actuarial pricing into a single unified system.
 
-**The core problem:** Global supply chains operate on fragmented, static networks. When disruptions occur (severe weather, geopolitical tensions, port strikes), logistics companies face losses not only from delays but also from insurance models that are entirely static. A company pays the same premium whether a shipment crosses a clear highway or enters a monsoon-flooded zone. Furthermore, alternate routes are typically calculated only after the disruption has already occurred.
-
-**Why it matters:** In an era where a single delayed container ship can bottleneck global trade, having a unified dashboard that actively predicts delays, monitors live weather conditions, generates AI-powered risk assessments, and dynamically prices insurance coverage for rerouted shipments is invaluable.
+**Core problem solved:** Global supply chains operate on fragmented, static networks. When disruptions occur, logistics companies face losses not only from delays but also from insurance models that are entirely static — a company pays the same premium whether a shipment crosses a clear highway or a monsoon-flooded zone.
 
 **Key Innovations:**
-- **Unsupervised ML Anomaly Detection:** Deploys an Isolation Forest algorithm on rolling historical data to identify complex delay patterns in real time based on multi-variate factors (weather severity, vehicle health, traffic patterns, temporal features).
-- **Live Weather Intelligence:** Monitors 8 geographic checkpoints along the Pune-Mumbai expressway via OpenWeatherMap API, automatically detecting dangerous conditions and triggering the disruption pipeline without human intervention.
-- **Google Gemini AI Advisory & Route Intelligence:** Integrates Google Gemini 2.5 Flash via REST API to synthesise data streams into contextual risk assessments, and simultaneously parses live weather sensor data into a continuous, defensible logistics news feed.
-- **Dynamic Graph Rerouting:** Constructs a 50-node geographic hub-and-spoke graph using NetworkX. Upon detecting a bottleneck, edge weights are penalised, instantly triggering Dijkstra's shortest-path algorithm to reroute the shipment.
-- **Real-time Insurance Hedging:** An actuarial pricing engine recalculates premiums dynamically. If the system reroutes a shipment to a safer path, the hedge cost drops immediately, providing tangible financial savings.
+- **ML-Powered Risk Scoring:** A RandomForest Regressor trained on synthetic transit data predicts per-checkpoint risk scores using weather, time, and road condition inputs.
+- **Live Weather Intelligence:** Monitors 8 geographic checkpoints along the Pune-Mumbai expressway via OpenWeatherMap API.
+- **Google Gemini AI Advisory:** Integrates Gemini 2.5 Flash (agentic function-calling) for contextual risk assessments, rerouting decisions, and insurance recommendations.
+- **Multimodal Graph Routing:** A NetworkX-based directed graph supporting road, rail, air, and sea transport modes with cargo-aware constraints.
+- **Actuarial Dynamic Pricing Engine:** Real-time insurance premium calculation with 5 independent pricing factors — cargo type, route risk score, coverage type, transport mode, and cargo value.
 
 ---
 
-## 2. UN Sustainable Development Goals
+## 2. Insurance Premium Calculation — Full Technical Reference
 
-InsureRoute addresses the following United Nations Sustainable Development Goals:
+This is the core pricing logic in `backend/core/insurance_engine.py`.
 
-### SDG 9: Industry, Innovation and Infrastructure
-InsureRoute builds resilient logistics infrastructure through predictive AI and algorithmic routing. By anticipating disruptions before they occur and automatically rerouting shipments, the platform strengthens the reliability of freight networks that underpin industrial supply chains.
+### 2.1 Master Formula
 
-### SDG 11: Sustainable Cities and Communities
-By dynamically rerouting cargo away from hazardous zones (flooded expressways, storm-affected corridors), InsureRoute reduces accident risk for both freight operators and the communities along transit routes, contributing to safer urban transportation.
+```
+Premium (₹) = Cargo Value (₹)
+              × Base Rate (by transport mode)
+              × Risk Loading Factor (by route risk score)
+              × Cargo Risk Multiplier (by cargo type)
+              × Coverage Multiplier (by coverage type)
+```
 
-### SDG 13: Climate Action
-The live weather intelligence module enables logistics providers to adapt to extreme weather events in real time, directly addressing the increasing unpredictability of climate patterns and their impact on supply chain reliability.
-
----
-
-## 3. Problem Statement
-
-The logistics and cargo insurance industries operate in distinct, uncommunicative silos. The problem breaks down into three critical sub-problems:
-
-1. **Reactive, Not Predictive Routing:** Current systems only reroute after a driver reports a blocked road or a port officially declares a strike. The delay has already occurred and the SLA is breached.
-2. **Inflexible Insurance Models:** Cargo insurance is typically bought on an annual flat-rate or static per-trip basis. If a shipper routes a high-value shipment through a severe thunderstorm, their premium does not increase dynamically. If they take a safer route, they receive no discount.
-3. **Data Fragmentation:** Historical transit times, weather data, node congestion metrics, and financial risk factors exist but are scattered across separate systems with no unified view for risk managers.
-
-**Real-World Scenario:**
-A pharmaceutical company ships temperature-sensitive vaccines from Pune to Mumbai. Heavy monsoon rains begin. Standard mapping tools might still suggest the flooded expressway as the fastest route. The truck halts in water, the cooling unit struggles, and the cargo is lost. Standard insurance investigations take months. With InsureRoute, the system detects the monsoon conditions via live weather monitoring plus historical delay patterns via ML, reroutes through a safer inland road, and adjusts the insurance hedge dynamically, saving both the cargo and the insurer massive payouts.
+Minimum premium floor: **₹500** (regardless of formula output).
 
 ---
 
-## 4. Existing Solutions Analysis
+### 2.2 Factor 1 — Transport Mode Base Rate
 
-Several tools address pieces of this problem, but none offer a cohesive end-to-end framework:
+The base rate is the starting insurance rate before any risk adjustment. It varies by transport mode because different modes have inherently different risk profiles.
 
-- **Google Maps / Waze for Enterprise:** Excellent real-time traffic updates, but purely reactive. Cannot factor cargo type, SLA risk, or financial implications.
-- **Traditional Telematics (Samsara, GeoTab):** Tracks truck location and engine health, but focuses on asset monitoring rather than predictive network mapping or financial hedging.
-- **Standard ERP Insurance Modules (SAP / Oracle):** Processes claims and manages policies, but updating premium risk models takes weeks of actuary sign-offs. No millisecond-level dynamic adjustment.
+| Transport Mode | Base Rate | Annual Rate Equivalent |
+|---|---|---|
+| Rail | **0.15%** of cargo value | Lowest — controlled environment, low theft |
+| Air | **0.20%** of cargo value | Low — fast transit, minimal weather exposure |
+| Sea | **0.25%** of cargo value | Medium — weather and port risk |
+| Road | **0.30%** of cargo value | Highest — traffic, weather, theft exposure |
 
-**The gap:** No lightweight, visual middleware sits between the dispatch router and the insurance underwriter. InsureRoute fills this exact gap.
+For multimodal routes (e.g., road + rail), the base rate is the **weighted average** across all modes used.
+
+**Example:**
+- Road + Rail multimodal = (0.003 + 0.0015) / 2 = **0.225%**
 
 ---
 
-## 5. Proposed Solution
+### 2.3 Factor 2 — Route Risk Score & Risk Loading
 
-InsureRoute is a fully integrated, real-time system that does not merely observe but acts. It creates a mathematical twin of a logistics network and continuously runs anomaly detection, weather monitoring, and AI analysis.
+The route risk score is a composite `0.0–1.0` score computed dynamically by the backend for each insurance quote. It blends three live data sources:
 
-**Core Innovation:**
-Instead of relying on rigid thresholds, InsureRoute uses unsupervised machine learning to determine if a specific combination of factors constitutes an anomaly. When the anomaly score drops below a critical threshold (-0.15), the system triggers a chain reaction:
+```
+Route Risk Score = (ML Score × 0.60) + (Disruption Severity × 0.25) + (Weather Severity × 0.15)
+```
 
-1. Penalises the specific graph edge in the network topology.
-2. Re-runs Dijkstra's algorithm to find the optimal path avoiding the penalised edge.
-3. Pushes the new risk probability into the actuarial pricing engine.
-4. Computes the dynamic hedge cost and shows exact capital saved.
-5. Feeds the complete context to Google Gemini for natural-language risk advisory and real-time news intelligence generation.
+| Source | Weight | Description |
+|---|---|---|
+| RandomForest ML Model | 60% | Predicted risk from weather, traffic, time, road conditions |
+| Live IoT Disruption Feed | 25% | Severity of active disruptions on route checkpoints |
+| Live OpenWeatherMap Weather | 15% | Worst severity across route checkpoints |
 
-**Unique Selling Points:**
-- **Millisecond Actuarial Recalibration:** Insurance repricing based on live graph permutations.
-- **Triple Detection Sources:** ML anomaly detection, live weather monitoring, and manual simulation working in concert.
-- **Google Gemini AI Co-pilot:** Converts complex multi-source data into clear, actionable recommendations for non-technical operations managers.
-- **Self-Healing Paths:** The graph topology automatically finds alternative routes without human intervention.
+Once the composite score is computed, it is converted to a **Risk Loading Factor** using a piecewise function that penalises high-risk routes exponentially:
+
+| Risk Score Range | Risk Loading Formula | Risk Class |
+|---|---|---|
+| 0.0 – 0.29 | `1.0` (no loading) | **LOW** |
+| 0.30 – 0.59 | `1.0 + (score − 0.30) × 2.0` | **MEDIUM** (up to 1.6×) |
+| 0.60 – 0.79 | `1.6 + (score − 0.60) × 4.0` | **HIGH** (up to 2.4×) |
+| 0.80 – 1.0 | `1.6 + (score − 0.60) × 4.0` | **CRITICAL** (up to 3.2×) |
+
+The steep exponential above 0.6 reflects actuarial reality: high-risk routes are disproportionately expensive to underwrite.
+
+**Examples:**
+- Risk score 0.2 → Loading 1.0× (no surcharge)
+- Risk score 0.45 → Loading 1.3×
+- Risk score 0.70 → Loading 2.2×
+- Risk score 0.90 → Loading 2.8×
+
+---
+
+### 2.4 Factor 3 — Cargo Type Multiplier
+
+Cargo type is a direct multiplier applied to the premium. Different cargo types have different inherent risk profiles (theft attractiveness, fragility, regulatory requirements, spoilage risk).
+
+| Cargo Type | Multiplier | Risk Rationale |
+|---|---|---|
+| Perishables (Fresh Produce) | **1.8×** | Highest — strict temperature control, time-critical, spoilage risk |
+| Pharmaceuticals | **1.6×** | Very high — regulatory requirements, cold chain, tamper sensitivity |
+| Chemicals / Industrial | **1.5×** | High — hazmat handling, spillage liability, regulatory compliance |
+| Electronics | **1.4×** | High — high theft attractiveness, moisture sensitivity |
+| FMCG / Consumer Goods | **1.1×** | Slight surcharge — bulk cargo, moderate theft risk |
+| Automotive Parts | **1.0×** | Baseline — standardised, low-sensitivity cargo |
+| Textiles | **0.9×** | Discount — low theft attractiveness, robust against weather |
+
+> **Note:** An unknown or unlisted cargo type defaults to `1.0×` (automotive baseline).
+
+**Impact example on ₹5,00,000 cargo (road, LOW risk):**
+| Cargo Type | Premium |
+|---|---|
+| Textiles | ₹1,350 |
+| Automotive Parts | ₹1,500 |
+| FMCG | ₹1,650 |
+| Electronics | ₹2,100 |
+| Chemicals | ₹2,250 |
+| Pharmaceuticals | ₹2,400 |
+| Perishables | ₹2,700 |
+
+---
+
+### 2.5 Factor 4 — Coverage Type Multiplier
+
+Coverage type determines the breadth of perils covered. Higher coverage costs proportionally more.
+
+| Coverage Type | Multiplier | What's Covered |
+|---|---|---|
+| Basic | **1.0×** | Named perils only (fire, theft, collision) |
+| Comprehensive | **1.6×** | All perils except war and nuclear events |
+| All Risk | **2.2×** | True all-risk — maximum protection |
+
+**Impact on ₹5,00,000 pharmaceutical cargo on a MEDIUM risk road route (score 0.45):**
+| Coverage | Premium |
+|---|---|
+| Basic | ₹3,120 |
+| Comprehensive | ₹4,992 |
+| All Risk | ₹6,864 |
+
+---
+
+### 2.6 Factor 5 — Cargo Value
+
+Premium scales linearly with declared cargo value. The higher the value, the higher the absolute premium (though the rate percentage is the same).
+
+| Cargo Value | Approx. Premium (Pharmaceutical, Road, Comprehensive, MEDIUM risk) |
+|---|---|
+| ₹1,00,000 | ~₹998 |
+| ₹5,00,000 | ~₹4,992 |
+| ₹10,00,000 | ~₹9,984 |
+| ₹50,00,000 | ~₹49,920 |
+
+---
+
+### 2.7 Premium Breakdown Response
+
+Every `/api/v1/insurance/quote` response includes a full itemised breakdown:
+
+```json
+{
+  "base_rate_pct": 0.3,
+  "risk_loading_factor": 1.3,
+  "cargo_multiplier": 1.6,
+  "coverage_multiplier": 1.6,
+  "final_rate_pct": 0.9984,
+  "premium_inr": 4992.0,
+  "risk_class": "MEDIUM",
+  "route_risk_score": 0.45,
+  "live_risk_score": 0.45,
+  "scored_at": "2026-04-25T11:00:00",
+  "breakdown": {
+    "base_premium": 1500.0,
+    "risk_loading_amount": 450.0,
+    "cargo_adjustment": 624.0,
+    "coverage_adjustment": 418.0
+  }
+}
+```
+
+---
+
+## 3. Route Risk Scoring — ML Engine Technical Reference
+
+The ML risk scoring is implemented in `backend/core/ml_engine.py`.
+
+### 3.1 Model
+
+| Parameter | Value |
+|---|---|
+| Algorithm | `RandomForestRegressor` (sklearn) |
+| n_estimators | 100 |
+| max_depth | 12 |
+| random_state | 42 |
+| n_jobs | -1 (all cores) |
+| Output | Risk score 0.0 – 1.0 |
+
+### 3.2 Input Features
+
+| Feature | Source |
+|---|---|
+| `hour_of_day` | Current server time |
+| `day_of_week` | Current server time |
+| `weather_code` | OpenWeatherMap live data |
+| `visibility_km` | Estimated from live rain data |
+| `wind_speed_kmh` | OpenWeatherMap live data (m/s → km/h) |
+| `rainfall_mm` | OpenWeatherMap live data |
+| `traffic_density` | 0.6 during rush hours (8–10, 17–19), else 0.3 |
+| `checkpoint_type_enc` | Encoded: road / rail / port / airport |
+| `road_condition_enc` | Encoded: good / moderate / poor (derived from weather) |
+| `incident_type_enc` | Encoded: none / accident / roadblock / flood |
+
+### 3.3 Checkpoint Types
+
+| Checkpoint ID Pattern | Type |
+|---|---|
+| CP01–CP08 | road |
+| RN01–RN04 | rail |
+| PT01, PT02 | port |
+| AP01 | airport |
+
+### 3.4 Composite Risk Score
+
+After ML inference per checkpoint, the composite route risk score is:
+
+```
+Composite = (avg_ml_score × 0.60) + (max_disruption_severity × 0.25) + (worst_weather_severity × 0.15)
+```
+
+Clamped to `[0.0, 1.0]`.
+
+---
+
+## 4. Routing Engine — Technical Reference
+
+Implemented in `backend/core/graph_router.py` using NetworkX.
+
+### 4.1 Graph Topology
+
+- **Graph type:** Undirected NetworkX Graph (bidirectional edges)
+- **Nodes:** Logistics hubs loaded from `backend/data/graph_topology.json`
+- **Edge attributes:** `mode`, `distance_km`, `base_time_min`, `cost_inr`, `co2_kg`, `weight`, `risk_weight`
+
+### 4.2 Transport Modes
+
+| Mode | Cost per km (₹) | CO₂ per km (kg) | Max Cargo Weight |
+|---|---|---|---|
+| Road | 35 | 0.27 | Per config |
+| Rail | Per config | Per config | Per config |
+| Air | Per config | Per config | Per config |
+| Sea | Per config | Per config | Per config |
+
+### 4.3 Cargo-Aware Routing Constraints
+
+The router enforces cargo-specific restrictions at the edge level:
+
+| Cargo Type | Restriction |
+|---|---|
+| Chemicals | **Rail blocked** (hazmat restriction) |
+| Perishables (requires cold chain) | **Sea blocked** (no cold chain on sea routes) |
+| Overweight cargo | Edges with `max_cargo_weight_tons` exceeded are **skipped** |
+
+### 4.4 Optimization Priority
+
+Routes are found using `nx.shortest_simple_paths` (up to 20 candidates), then sorted and filtered:
+
+| Priority | Sort Key |
+|---|---|
+| Speed | `total_time_min` |
+| Cost | `total_cost_inr` |
+| Safety | `total_time_min + (transfers × 30)` |
+
+**Route filtering:** Routes that are >2.5× worse than the best route in both time AND cost are pruned. Top 5 returned.
+
+### 4.5 Dynamic Cost Surcharges
+
+Beyond base costs, routes receive dynamic surcharges at calculation time:
+
+| Surcharge | Trigger | Range |
+|---|---|---|
+| Cargo Premium | `chemicals`, `automotive`, `pharmaceuticals` | +5% to +25% |
+| Short-Haul Volatility | Distance < 200 km | ±20% |
+| Long-Haul Contract | Distance > 500 km | ±8% |
+| Standard Spot Rate | 200–500 km | ±15% |
+| Rush Hour Surge | 8–10 AM or 5–7 PM | +8% to +15% |
+
+The dominant surcharge driver is labelled per route: `"High Demand Surge"`, `"Favorable Market Rate"`, or `"Standard Spot Rate"`.
+
+---
+
+## 5. API Endpoints Reference
+
+Base URL: `http://localhost:8000`
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/health` | Health check |
+| `GET` | `/api/v1/nodes` | All logistics hub nodes (id, name, lat, lon) |
+| `GET` | `/api/v1/cargo-types` | All supported cargo types |
+| `POST` | `/api/v1/shipments/create` | Create shipment, get route options |
+| `GET` | `/api/v1/routes/{id}/options` | Get route options for shipment |
+| `POST` | `/api/v1/insurance/quote` | Get dynamic insurance premium quote |
+| `POST` | `/api/v1/gemini/chat` | Chat with Gemini AI agent |
+| `GET` | `/api/v1/disruptions/live` | Live active disruptions |
+| `WS` | `/ws/monitor/{shipment_id}` | WebSocket live shipment monitor |
+| `GET` | `/api/v1/data` (legacy) | Legacy polling endpoint |
+| `GET` | `/api/v1/weather-status` (legacy) | Legacy weather status |
+| `GET` | `/api/v1/ai-advisor` (legacy) | Legacy Gemini advisory |
 
 ---
 
 ## 6. System Architecture
 
-The system relies on a decoupled frontend-backend architecture connected via RESTful API.
+### 6.1 Backend Module Structure
 
-### Component Breakdown
+```
+backend/
+├── api.py                        # Entry point — imports app from main.py
+├── main.py                       # FastAPI app, all route handlers, tool executors
+├── core/
+│   ├── insurance_engine.py       # Actuarial pricing (5-factor formula)
+│   ├── ml_engine.py              # RandomForest risk scorer
+│   ├── graph_router.py           # NetworkX multimodal routing
+│   ├── gemini_agent.py           # Gemini 2.5 Flash agentic AI (function calling)
+│   └── disruption_feed.py        # Live IoT disruption simulator
+├── legacy/
+│   ├── api.py                    # Legacy FastAPI router (weather polling, Isolation Forest)
+│   ├── pricing_engine.py         # Legacy actuarial engine
+│   ├── simulation.py             # Legacy pipeline orchestrator
+│   ├── weather_service.py        # OpenWeatherMap integration (8 checkpoints)
+│   └── route_risk_advisor.py     # Legacy Gemini advisor
+├── models/
+│   ├── schemas.py                # Pydantic request/response models
+│   ├── risk_model.pkl            # Trained RandomForest model (auto-generated)
+│   └── encoders.pkl              # LabelEncoders (auto-generated)
+├── data/
+│   ├── graph_topology.json       # Hub nodes and edges
+│   ├── cargo_types.json          # Cargo type config
+│   ├── multimodal_config.json    # Mode costs, penalties
+│   └── transit_risk.csv          # Training data for ML model
+└── routers/                      # Additional FastAPI routers
+```
 
-1. **Data Ingestion Layer (`data_loader.py`):** Parses structured datasets (30,000 row CSV), handles null values, standardises types, and caches in memory.
-2. **Feature Engineering Layer (`preprocessing.py`):** Constructs ML features (delay_ratio, rolling_delay_mean, temperature_deviation, weather_severity_index, route_utilisation_ratio). Applies StandardScaler normalisation.
-3. **Machine Learning Engine (`model.py`):** Trains Isolation Forest (n_estimators=200, contamination=0.08) and provides single-row inference for live scoring.
-4. **Weather Intelligence Service (`weather_service.py`):** Polls OpenWeatherMap API for 8 Pune-Mumbai checkpoints every 60 seconds. Classifies conditions by severity (rain rate, wind speed, weather ID). Runs as an async background task within FastAPI.
-5. **Graph and Routing Controller (`graph_engine.py`):** Manages a 50-node directed graph with bidirectional edges. Stores geographic coordinates (lat/lon) for all hubs. Executes Dijkstra's algorithm with edge penalisation on disruption.
-6. **Actuarial Pricing Engine (`pricing_engine.py`):** Computes base premium (Cargo Value x Disruption Probability x 0.08), applies weather and perishable multipliers, and calculates before/after rerouting savings.
-7. **Google Gemini AI Advisor (`gemini_advisor.py`):** Constructs a detailed prompt from the current shipment context and sends it to Gemini 2.5 Flash via direct REST API integration. Parses structured responses into summary, action items, and insurance tips.
-8. **News Intelligence Service (`news_service.py`):** Generates real-time logistics intelligence by parsing live OpenWeatherMap sensor data using the Gemini API to produce context-aware supply chain news briefs.
-9. **FastAPI Pipeline (`api.py`):** Central orchestrator. Routes requests to the appropriate engine, manages the weather polling background task, and serialises all outputs into structured JSON.
-10. **Simulation Orchestrator (`simulation.py`):** Manages the per-tick pipeline: sample data, score with ML, route with graph, price with actuarial engine.
-11. **React Dashboard (`Dashboard.jsx`):** Consumes API JSON and orchestrates visual state across KPI cards, network map, insurance panel, weather banner, route timeline, AI advisor panel, news panel, and event log.
+### 6.2 Frontend Module Structure
 
-### Data Flow
+```
+frontend/src/
+├── screens/
+│   └── InsureRouteDashboard.jsx  # Main dashboard screen
+├── components/
+│   ├── AIAdvisorPanel.jsx        # Gemini AI advisory display
+│   ├── WeatherStatusBanner.jsx   # Live weather alert banner
+│   └── ...                       # Other UI components
+├── api/
+│   └── index.js                  # Axios API client
+├── App.jsx
+└── main.jsx
+```
 
-1. **Client Request:** React dashboard polls `/data` every 3 seconds.
-2. **Weather Check:** Background task has latest weather state from 8 checkpoints.
-3. **State Initialisation:** Backend fetches a random data slice simulating current truck status.
-4. **ML Inference:** Row passed to Isolation Forest. Anomaly score generated.
-5. **Routing Decision:** If score < threshold OR weather is dangerous, graph edge weight increased x15. Dijkstra finds alternate path.
-6. **Pricing Calculation:** Engine calculates standard cost vs. mitigated cost.
-7. **AI Advisory:** Full context sent to Gemini for natural-language assessment.
-8. **Client Render:** JSON payload delivered to React. Dashboard updates all panels with animations.
+### 6.3 Full Data Flow
 
----
-
-## 7. Technology Stack
-
-### Backend Infrastructure
-- **Language:** Python 3.10+
-- **Web Framework:** FastAPI with Pydantic validation and native async support
-- **Machine Learning:** Scikit-Learn (Isolation Forest), Pandas, NumPy
-- **Graph Routing:** NetworkX (Dijkstra's Algorithm)
-- **AI Advisory & News:** Google Gemini 2.5 Flash via direct REST API
-- **Weather Monitoring:** OpenWeatherMap API via `requests`
-- **Environment Management:** python-dotenv
-
-### Frontend Infrastructure
-- **Framework:** React 18 with functional components and hooks
-- **Build Tool:** Vite (native ES modules, instant HMR)
-- **Styling:** Tailwind CSS (utility-first with custom design tokens)
-- **Charting:** Recharts (AreaChart for risk trends)
-- **Mapping:** react-simple-maps with react-simple-maps (ComposableMap, ZoomableGroup)
-- **Animation:** Framer Motion
-- **Icons:** Lucide-React
-- **HTTP Client:** Axios with mock fallback
-
----
-
-## 8. Methodology
-
-1. **Data Synthesis:** Real logistics data is proprietary, so a credible statistical replica of 30,000 transit events was synthesised, maintaining multivariate correlations (heavy rain correlates with increased delay ratios).
-2. **Unsupervised Pipeline Training:** Explicit failure labels are often missing in real-time supply chains, so unsupervised ML was chosen. The Isolation Forest algorithm partitions data; anomalies require fewer partitions to isolate.
-3. **Live Weather Integration:** OpenWeatherMap API provides real-time conditions for 8 geographic checkpoints. Dangerous conditions (weather ID 200-622, rain > 2.5mm/hr, wind > 10m/s) automatically trigger the disruption pipeline.
-4. **Algorithmic Bridging:** The statistical output (anomaly score) is linked directly to graph edge weight, converting abstract predictions into concrete geographic actions.
-5. **AI-Powered Advisory & Intelligence:** Google Gemini receives the full shipment context and weather data via a structured prompt with system instructions, producing parsed risk assessments and live news briefs that bridge the gap between technical metrics and executive decision-making.
-6. **Financial Modelling:** Base Premium formula (Cargo Value x Risk Probability x 0.08) with categorical multipliers (Weather: 1.4x if monsoon, Perishable: 1.6x if perishable). The difference between unmitigated and rerouted risk yields exact hedge savings.
-
----
-
-## 9. Features and Functionalities
-
-- **Live Weather Monitoring Dashboard:** Real-time weather data for all 8 Pune-Mumbai checkpoints displayed in an interactive route timeline with severity-coded dots, hover tooltips showing rain rate, wind speed, temperature, and humidity.
-- **Automatic Weather-Triggered Rerouting:** When live weather detects dangerous conditions at any checkpoint, the system automatically triggers the full disruption pipeline (ML scoring, graph rerouting, pricing recalculation) without user action.
-- **Google Gemini AI Risk Advisor & Route Intelligence:** Dedicated panels displaying AI-generated risk summaries, prioritised action items, insurance optimisation recommendations, and a live news feed generated from weather telemetry, powered by Gemini 2.5 Flash.
-- **Live Disruption Simulator:** Dedicated controls for manually injecting disruptions, allowing users to stress-test the system and observe reactions across all panels.
-- **Intelligent Network Graph Visualiser:** An interactive map component built with react-simple-maps showing 50 Indian logistics hubs, active route highlighting, disrupted path marking, custom origin/destination selection dropdowns, and dynamic seeded-randomized weather metrics for non-primary routes.
-- **Dynamic Insurance Hedge Module:** Continuously running actuarial calculations showing "Standard Route" vs "Hedged Route" costs with percentage savings.
-- **Real-time KPI Cards:** Animated metric cards showing SLA Breach Rate, Average Delay, Current Risk, and Cost Savings with threshold-based colour coding.
-- **Event Stream Log:** Chronological event log with categorised entries (disruption, reroute, savings, info, model) providing full transparency.
-- **Weather Status Banner:** A context-aware banner that shifts between a compact green "all clear" pill and a full-width red/amber disruption alert with live data attribution.
+```
+React Dashboard (3s polling)
+        │
+        ▼
+POST /api/v1/insurance/quote
+        │
+        ├──► score_route_tool()
+        │         │
+        │         ├──► predict_risk() [ML — RandomForest]
+        │         │         inputs: weather, time, traffic, road condition
+        │         │
+        │         ├──► disruption_simulator.get_active() [IoT Feed]
+        │         │
+        │         └──► live_weather_state [OpenWeatherMap background task]
+        │
+        ├──► calculate_dynamic_premium()
+        │         Formula: Value × BaseRate × RiskLoading × CargoMul × CoverageMul
+        │
+        └──► JSON response with breakdown
+```
 
 ---
 
-## 10. Implementation Details
+## 7. Weather Intelligence
 
-**Isolation Forest Configuration:**
-Data passes through `preprocessing.py` where categorical text is encoded and numerical features (temperature_deviation, rolling_delay_mean_6h, weather_severity_index) are scaled using StandardScaler. The model runs with n_estimators=200 for deep tree consensus and contamination=0.08 assuming an 8% industry-standard failure rate.
+Implemented in `backend/legacy/weather_service.py`.
 
-**Graph Logic and Edge Penalisation:**
-Within `graph_engine.py`, edges are added as `G.add_edge(hub_a, hub_b, weight=normal_time)`. When the orchestrator receives a score below -0.15, it targets the active edge and multiplies the weight by 15. Dijkstra then finds the shortest path avoiding the penalty.
+- **Data source:** OpenWeatherMap API `/data/2.5/weather`
+- **Polling interval:** Every 60 seconds via `asyncio.create_task`
+- **Checkpoints monitored:** Pune, Lonavla, Khopoli, Khalapur, Panvel, Navi Mumbai, Mumbai, Bhiwandi
+- **Rate limit mitigation:** 2-second delay between API calls
 
-**Weather Service Pipeline:**
-The `weather_service.py` module polls OpenWeatherMap for 8 checkpoints (Pune, Lonavla, Khopoli, Khalapur, Panvel, Navi Mumbai, Mumbai, Bhiwandi) with 2-second delays between requests to respect rate limits. Each checkpoint is classified by danger (weather ID 200-622, rain > 2.5mm/hr, wind > 10m/s) and severity (0.0-1.0 scale).
+### Danger Classification
 
-**Gemini AI Integration:**
-The `gemini_advisor.py` and `news_service.py` modules construct detailed prompts containing shipment context and live weather data. A system instruction enforces structured output format (SUMMARY, ACTIONS, INSURANCE_TIP, and NEWS BRIEFS). The backend integrates directly with the Gemini REST API (bypassing the SDK) to ensure reliable real-time inference. Responses are parsed into structured data for frontend rendering. Graceful fallback is provided when the API key is unavailable.
+| Condition | Threshold | Classified As |
+|---|---|---|
+| Weather ID | 200–622 | Dangerous (storm, rain, snow, fog codes) |
+| Rainfall | > 2.5 mm/hr | Dangerous |
+| Wind speed | > 10 m/s | Dangerous |
 
-**Asynchronous Architecture:**
-The weather polling loop runs as an async background task (`asyncio.create_task`) within FastAPI's startup event. Weather state is stored in a module-level dict and snapshotted per-request to avoid race conditions. The React frontend polls `/data` every 3 seconds and `/weather-status` every 30 seconds independently.
+### Cargo-Specific Weather Rules (Legacy API)
 
----
-
-## 11. Prototype and Demo Explanation
-
-The prototype functions as a digital twin of a live logistics environment.
-
-**Demo Flow:**
-1. **Baseline:** The dashboard loads and polls data automatically. The graph shows optimal routing. KPIs show normal risk. Insurance shows baseline premium. AI advisor provides situation assessment.
-2. **Automatic Weather Detection:** If any Pune-Mumbai checkpoint detects dangerous weather, the weather banner turns red, the route timeline highlights affected segments, and the system auto-reroutes.
-3. **Manual Trigger:** Users press "Force Disruption" to simulate extreme conditions.
-4. **System Response:** KPIs turn red. Anomaly banner appears. The graph severs the compromised route and draws an alternate path. Insurance panel calculates the hedged price. AI advisor generates specific recommendations.
-5. **Financial Outcome:** The dashboard clearly shows the exact monetary savings from proactive rerouting.
+| Cargo Type | Condition | Risk Triggered |
+|---|---|---|
+| Electronics | Humidity > 75% OR rain > 1.0 mm/hr | Yes |
+| Pharmaceuticals, Perishables | Temperature > 30°C | Yes |
+| Heavy Machinery | Wind speed > 8 m/s | Yes |
+| Textiles | Humidity > 80% | Yes |
+| Chemicals | Temperature > 35°C | Yes |
+| Automotive Parts | Humidity > 70% AND rain > 0.5 mm/hr | Yes |
 
 ---
 
-## 12. Innovation
+## 8. Gemini AI Integration
 
-- **Triple Intelligence Fusion:** ML anomaly detection, live weather monitoring, and Google Gemini AI working in concert. No other hackathon project combines all three.
-- **Financialisation of Logistics:** Unlike pure routing tools, InsureRoute directly ties pathfinding to capital risk through dynamic insurance hedging.
-- **Predictive over Reactive:** The platform anticipates delays mathematically before they manifest.
-- **AI Co-pilot for Operations:** Gemini translates complex technical data into actionable language for non-technical managers.
-- **Enterprise-Grade Design:** Custom Tailwind design tokens, structural layouts, colour theory, and responsive grid layouts deliver a production-quality interface.
+Implemented in `backend/core/gemini_agent.py`.
 
----
+- **Model:** Gemini 2.5 Flash
+- **Integration:** REST API (direct) and Gemini SDK (function calling)
+- **Capabilities:** Agentic function-calling with defined tool executors
 
-## 13. Applications
+### Available Tools (Agent Functions)
 
-- **Perishable Supply Chains (Cold Chain):** Medical supplies or food produce where temperature control and speed are critical.
-- **Dynamic Maritime Shipping Pricing:** Rerouting container vessels around geopolitical chokepoints with dynamic cargo premiums.
-- **Urban Last-Mile Logistics:** High-density delivery networks adjusting routing and compensation based on real-time conditions.
-- **Fleet Management Strategy:** Identifying systemic network weaknesses from historical failure hotspots.
+| Tool | Purpose |
+|---|---|
+| `get_disruptions` | Fetch active disruptions for specified checkpoints |
+| `score_route` | Get live composite risk score for a route |
+| `calculate_premium` | Get full insurance premium quote |
+| `trigger_reroute` | Find alternate routes avoiding checkpoints |
+| `get_multimodal_options` | Get all transport mode options |
+| `get_weather_forecast` | Get weather forecast for a location |
 
----
+The agent can chain these tools autonomously to answer complex logistics questions in natural language.
 
-## 14. Advantages
-
-- **Actionable over Raw:** Distils complex weather, ML, and financial data into singular decisions through AI advisory.
-- **Defensive Financial Positioning:** Allows underwriters to avoid catastrophic payouts by pre-emptive risk mitigation.
-- **Software Agility:** Decoupled architecture allows any engine to be upgraded independently.
-- **Multiple Detection Sources:** Weather API, ML model, and manual simulation provide redundant disruption detection.
+### Image Analysis
+The agent also supports `analyze_weather_image()` — users can upload weather images and the Gemini Vision API will analyze conditions and provide risk assessments.
 
 ---
 
-## 15. Limitations
+## 9. UN Sustainable Development Goals
 
-- **Synthetic Node Restriction:** The current graph operates on a predefined 50-node topology. Production integration with OSRM or Google Maps API would provide street-level routing.
-- **Static Historical Window:** ML inference uses pre-calculated historical data rather than live IoT telemetry streams.
-- **Threshold Calibration:** The disruption threshold (-0.15) is manually optimised. Production deployment would require continuous threshold recalibration.
-- **Gemini Rate Limits:** The free-tier Gemini API has rate limits (15 RPM) that would need to be addressed for production traffic.
-
----
-
-## 16. Future Scope
-
-1. **Agentic AI and LLMs:** Integrating Gemini's multi-modal capabilities to process breaking news images, social media feeds, and satellite imagery as risk inputs.
-2. **Live IoT Telemetry:** Connecting to physical hardware (GPS OBD2 sensors, Thermo King reefer sensors) via high-throughput message queues.
-3. **Graph Neural Networks:** Applying GNNs directly onto the NetworkX topology to predict cascading multi-node failures.
-4. **Google Cloud Deployment:** Cloud Run for the API, Cloud SQL for persistent analytics, Vertex AI for model serving, and Pub/Sub for event streaming.
-5. **Decentralised Smart Contracts:** Writing pricing parameters onto blockchain smart contracts for automated premium settlement.
+| SDG | Contribution |
+|---|---|
+| **SDG 9** — Industry, Innovation and Infrastructure | Builds resilient logistics infrastructure through predictive AI |
+| **SDG 11** — Sustainable Cities and Communities | Reroutes cargo away from hazardous zones, reducing accident risk |
+| **SDG 13** — Climate Action | Integrates live weather intelligence to pre-emptively mitigate extreme weather impact |
 
 ---
 
-## 17. Conclusion
+## 10. Limitations and Future Scope
 
-InsureRoute demonstrates that the historically rigid frameworks of supply chain routing and static cargo underwriting can be disrupted through deeply integrated technology.
+### Current Limitations
 
-By combining Isolation Forest anomaly detection, live OpenWeatherMap weather intelligence, Google Gemini AI advisory, NetworkX graph routing, and actuarial pricing into a single platform, we have architected an intelligent, self-healing supply chain network. The React dashboard ensures that this technical complexity remains entirely invisible to operations managers, providing them clarity, tangible financial savings, and proactive control over fragile logistics environments.
+| Limitation | Detail |
+|---|---|
+| Fixed graph topology | Predefined nodes; no street-level routing (OSRM/Google Maps) |
+| Synthetic training data | ML trained on simulated data, not live IoT telemetry |
+| Single region weather | Live weather only covers Pune-Mumbai corridor |
+| Rate limits | Free-tier Gemini (15 RPM) and OpenWeatherMap limits |
 
-It is a blueprint for the future of predictive, AI-augmented supply chain management.
+### Roadmap
+
+1. **Agentic AI:** Gemini multi-modal processing of breaking news, satellite imagery, and social media feeds as risk inputs.
+2. **Live IoT Telemetry:** GPS OBD2 sensors and Thermo King reefer units via message queues.
+3. **Graph Neural Networks:** GNNs on the NetworkX topology for cascading failure prediction.
+4. **Google Cloud Deployment:** Cloud Run API, Cloud SQL analytics, Vertex AI model serving, Pub/Sub event streaming.
+5. **Smart Contracts:** Blockchain-based automated premium settlement.
+
+---
+
+## 11. Team and License
+
+Developed by **HoloSquad** for the Google Solution Challenge 2026.
+Licensed under the MIT License. See [LICENSE](LICENSE) for details.

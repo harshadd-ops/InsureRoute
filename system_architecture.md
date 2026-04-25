@@ -69,10 +69,11 @@ The core mathematical execution environment contains five parallel modules:
 - **Topology:** 50 nodes representing Indian logistics hubs with geographic coordinates (lat/lon)
 - **Function:** On anomaly detection (score < -0.15) or dangerous weather, the active edge weight is multiplied by 15, and Dijkstra calculates the bypass route avoiding the failure zone.
 
-#### D. Actuarial Pricing Engine (`pricing_engine.py`)
-- **Formula:** Base Premium = Cargo Value x Disruption Probability x 0.08
-- **Multipliers:** Weather (1.4x if monsoon), Perishable (1.6x if perishable cargo)
-- **Function:** Converts risk likelihood into financial representation. Calculates both unmitigated liability and hedged risk values to show exact savings from rerouting.
+#### D. Actuarial Pricing Engine (`insurance_engine.py`)
+- **Formula:** Base Rate × Risk Loading × Cargo Multiplier × Coverage Multiplier × Cargo Value
+- **Base Rates:** Modulated by transport mode (Road: 0.30%, Sea: 0.25%, Air: 0.20%, Rail: 0.15%).
+- **Multipliers:** Cargo type (e.g., Perishables: 1.8x, Pharma: 1.6x) and Coverage Type (e.g., All Risk: 2.2x).
+- **Function:** Converts live composite risk score (derived from ML, IoT, and weather) into an exponential financial risk loading factor. Calculates dynamic insurance quotes in real-time, enforcing a minimum premium floor.
 
 #### E. Google Gemini AI Advisor (`gemini_advisor.py`)
 - **Model:** Gemini 2.5 Flash via direct REST API integration

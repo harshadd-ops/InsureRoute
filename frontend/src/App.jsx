@@ -4,25 +4,82 @@ import ShipmentSetup from './screens/ShipmentSetup';
 import RouteIntelligence from './screens/RouteIntelligence';
 import LiveMonitor from './screens/LiveMonitor';
 import InsurancePanel from './screens/InsurancePanel';
+import InsureRouteDashboard from './screens/InsureRouteDashboard';
 
 function App() {
   return (
-    <div className="min-h-screen bg-bgPrimary text-textPrimary">
-      <header className="bg-bgCard border-b border-border p-4 shadow-sm">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <h1 className="text-2xl font-bold font-display text-accentPrimary">InsureRoute</h1>
-          <span className="text-sm text-textSecondary font-mono">Operations Command Center</span>
-        </div>
-      </header>
-      <main className="p-4 md:p-6 max-w-7xl mx-auto">
-        <Routes>
-          <Route path="/" element={<ShipmentSetup />} />
-          <Route path="/route/:shipmentId" element={<RouteIntelligence />} />
-          <Route path="/monitor/:shipmentId" element={<LiveMonitor />} />
-          <Route path="/insurance/:shipmentId" element={<InsurancePanel />} />
-        </Routes>
-      </main>
-    </div>
+    <Routes>
+      {/* Original home page — New Shipment form */}
+      <Route
+        path="/"
+        element={
+          <div className="min-h-screen bg-bgPrimary text-textPrimary">
+            <header className="bg-bgCard border-b border-border p-4 shadow-sm">
+              <div className="max-w-7xl mx-auto flex items-center justify-between">
+                <h1 className="text-2xl font-bold font-display text-accentPrimary">InsureRoute</h1>
+                <span className="text-sm text-textSecondary font-mono">Operations Command Center</span>
+              </div>
+            </header>
+            <main className="p-4 md:p-6 max-w-7xl mx-auto">
+              <ShipmentSetup />
+            </main>
+          </div>
+        }
+      />
+
+      {/* Enhanced multi-modal dashboard (standalone, full-viewport) */}
+      <Route path="/dashboard" element={<InsureRouteDashboard />} />
+
+      {/* Existing screens */}
+      <Route
+        path="/route/:shipmentId"
+        element={
+          <div className="min-h-screen bg-bgPrimary text-textPrimary">
+            <header className="bg-bgCard border-b border-border p-4 shadow-sm">
+              <div className="max-w-7xl mx-auto flex items-center justify-between">
+                <h1 className="text-2xl font-bold font-display text-accentPrimary">InsureRoute</h1>
+                <span className="text-sm text-textSecondary font-mono">Operations Command Center</span>
+              </div>
+            </header>
+            <main className="p-4 md:p-6 max-w-7xl mx-auto">
+              <RouteIntelligence />
+            </main>
+          </div>
+        }
+      />
+      <Route
+        path="/monitor/:shipmentId"
+        element={
+          <div className="min-h-screen bg-bgPrimary text-textPrimary">
+            <header className="bg-bgCard border-b border-border p-4 shadow-sm">
+              <div className="max-w-7xl mx-auto flex items-center justify-between">
+                <h1 className="text-2xl font-bold font-display text-accentPrimary">InsureRoute</h1>
+                <span className="text-sm text-textSecondary font-mono">Operations Command Center</span>
+              </div>
+            </header>
+            <main className="p-4 md:p-6 max-w-7xl mx-auto">
+              <LiveMonitor />
+            </main>
+          </div>
+        }
+      />
+      <Route
+        path="/insurance/:shipmentId"
+        element={
+          <div className="min-h-screen bg-bgPrimary text-textPrimary">
+            <header className="bg-bgCard border-b border-border p-4 shadow-sm">
+              <div className="max-w-7xl mx-auto flex items-center justify-between">
+                <h1 className="text-2xl font-bold font-display text-accentPrimary">InsureRoute</h1>
+                <span className="text-sm text-textSecondary font-mono">Operations Command Center</span>
+              </div>
+            </header>
+            <main className="p-4 md:p-6 max-w-7xl mx-auto">
+              <InsurancePanel />
+            </main>
+          </div>
+        }
+      />
+    </Routes>
   );
 }
 

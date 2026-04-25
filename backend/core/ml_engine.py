@@ -6,15 +6,17 @@ from sklearn.preprocessing import LabelEncoder
 import pickle
 import os
 
-MODEL_PATH = "models/risk_model.pkl"
-ENCODERS_PATH = "models/encoders.pkl"
+base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODEL_PATH = os.path.join(base_dir, "models", "risk_model.pkl")
+ENCODERS_PATH = os.path.join(base_dir, "models", "encoders.pkl")
+DATA_PATH = os.path.join(base_dir, "data", "transit_risk.csv")
 
 FEATURES = ['hour_of_day', 'day_of_week', 'weather_code', 'visibility_km',
             'wind_speed_kmh', 'rainfall_mm', 'traffic_density', 
             'checkpoint_type_enc', 'road_condition_enc', 'incident_type_enc']
 
 def train_model():
-    df = pd.read_csv("data/transit_risk.csv")
+    df = pd.read_csv(DATA_PATH)
     
     # Add checkpoint_type derived from checkpoint_id
     type_map = {**{f'CP0{i}': 'road' for i in range(1,9)},
@@ -36,7 +38,7 @@ def train_model():
     model = RandomForestRegressor(n_estimators=100, max_depth=12, random_state=42, n_jobs=-1)
     model.fit(X, y)
     
-    os.makedirs('models', exist_ok=True)
+    os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
     with open(MODEL_PATH, 'wb') as f: pickle.dump(model, f)
     with open(ENCODERS_PATH, 'wb') as f:
         pickle.dump({'road': le_road, 'incident': le_incident, 'type': le_type}, f)

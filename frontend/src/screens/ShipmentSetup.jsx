@@ -30,7 +30,8 @@ export default function ShipmentSetup() {
   const createMutation = useMutation({
     mutationFn: createShipment,
     onSuccess: (data) => {
-      navigate(`/route/${data.shipment_id}`);
+      // Navigate to the enhanced dashboard with the analysis result
+      navigate('/dashboard', { state: data });
     }
   });
 

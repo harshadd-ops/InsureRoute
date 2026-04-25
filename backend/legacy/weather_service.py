@@ -101,6 +101,8 @@ def _parse_checkpoint(raw: dict, checkpoint: dict) -> dict:
 
     return {
         "name":         checkpoint["name"],
+        "lat":          checkpoint["lat"],
+        "lon":          checkpoint["lon"],
         "role":         checkpoint["role"],
         "is_dangerous": is_dangerous,
         "severity":     severity,
@@ -149,6 +151,8 @@ def fetch_route_weather() -> dict:
                 # If one checkpoint fails, append a safe placeholder
                 parsed_checkpoints.append({
                     "name":         cp["name"],
+                    "lat":          cp["lat"],
+                    "lon":          cp["lon"],
                     "role":         cp["role"],
                     "is_dangerous": False,
                     "severity":     0.0,

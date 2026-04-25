@@ -40,3 +40,15 @@ export const getCargoTypes = async () => {
   const res = await api.get('/api/v1/cargo-types');
   return res.data;
 };
+
+export const getWeatherStatus = async () => {
+  const res = await api.get('/api/v1/weather-status');
+  return res.data;
+};
+
+export const getRouteNews = async (origin, destination) => {
+  const res = await api.get('/api/v1/route-news', {
+    params: { origin, destination }
+  });
+  return res.data;
+};

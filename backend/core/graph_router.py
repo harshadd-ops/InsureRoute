@@ -1,6 +1,8 @@
 import networkx as nx
 import json
 import os
+import random
+from datetime import datetime
 
 def build_multimodal_graph(topology_path: str, 
                             blocked_checkpoints: list = None,
@@ -71,7 +73,7 @@ def build_multimodal_graph(topology_path: str,
 def find_optimal_routes(origin: str, destination: str, 
                          blocked: list = None,
                          priority: str = "speed",
-                         top_k: int = 3,
+                         top_k: int = 5,
                          cargo_type: str = "fmcg",
                          cargo_weight_tons: float = 1.0) -> list[dict]:
     if blocked is None:
@@ -88,10 +90,10 @@ def find_optimal_routes(origin: str, destination: str,
     }.get(priority, "base_time_min")
     
     try:
-        # Get up to 10 simple paths to evaluate
+        # Get up to 20 simple paths to evaluate
         path_gen = nx.shortest_simple_paths(G, origin, destination, weight=weight_fn)
         paths = []
-        for _ in range(10):
+        for _ in range(20):
             try:
                 paths.append(next(path_gen))
             except StopIteration:
@@ -127,6 +129,61 @@ def find_optimal_routes(origin: str, destination: str,
         total_distance = sum(e['distance_km'] for e in edges)
         total_co2 = sum(e['co2_kg'] for e in edges)
         
+        # --- DYNAMIC COST CALCULATION ---
+        # 1. Cargo-type surcharge (+5% to +25%)
+        cargo_surcharge = 0.0
+        cargo_driver = ""
+        if cargo_type in ['chemicals', 'automotive', 'pharmaceuticals']:
+            cargo_surcharge = random.uniform(0.05, 0.25)
+            cargo_driver = "Cargo Premium"
+            
+        # 2. Route distance tier volatility
+        volatility = 0.15
+        if total_distance < 200:
+            volatility = 0.20
+            distance_driver = "Short-Haul Volatility"
+        elif total_distance > 500:
+            volatility = 0.08
+            distance_driver = "Long-Haul Contract"
+        else:
+            distance_driver = "Spot Rate"
+            
+        market_surge = random.uniform(-volatility, volatility)
+        
+        # 3. Time-of-day / Rush Hour
+        hour = datetime.now().hour
+        rush_hour_surge = 0.0
+        if 8 <= hour <= 10 or 17 <= hour <= 19:
+            rush_hour_surge = random.uniform(0.08, 0.15)
+            time_driver = "Rush Hour"
+        else:
+            time_driver = ""
+
+        # Determine main driver
+        total_surge_pct = cargo_surcharge + market_surge + rush_hour_surge
+        
+        if cargo_surcharge > abs(market_surge) and cargo_surcharge > rush_hour_surge:
+            driver = cargo_driver
+        elif rush_hour_surge > abs(market_surge):
+            driver = time_driver
+        else:
+            driver = distance_driver
+            
+        if total_surge_pct > 0.10:
+            label = "High Demand Surge"
+        elif total_surge_pct < -0.05:
+            label = "Favorable Market Rate"
+        else:
+            label = "Standard Spot Rate"
+            
+        total_cost = total_cost * (1 + total_surge_pct)
+        
+        market_trend = {
+            "label": label,
+            "delta_pct": round(total_surge_pct * 100, 1),
+            "driver": driver
+        }
+        
         routes.append({
             "route_id": f"ROUTE_{chr(65+i)}",
             "path": path,
@@ -137,6 +194,7 @@ def find_optimal_routes(origin: str, destination: str,
             "total_cost_inr": round(total_cost, 2),
             "total_distance_km": round(total_distance, 2),
             "total_co2_kg": round(total_co2, 2),
+            "market_trend": market_trend,
             "checkpoints": [n for n in path if n.startswith('CP') or n.startswith('RN') or n.startswith('PT') or n.startswith('AP')]
         })
     
