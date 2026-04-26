@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="logo/name_solution.jpeg" alt="InsureRoute" height="60" />
+  <img src="logo/logo_solution.jpeg" alt="InsureRoute" height="150" />
   <h3>Smart Supply Chain Intelligence & Dynamic Pricing</h3>
   <p>Predictive AI-powered logistics intelligence with real-time weather monitoring, algorithmic rerouting, and actuarial risk hedging.</p>
 
