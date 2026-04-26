@@ -3,6 +3,12 @@
   <h3>Smart Supply Chain Intelligence & Dynamic Pricing</h3>
   <p>Predictive AI-powered logistics intelligence with real-time weather monitoring, algorithmic rerouting, and actuarial risk hedging.</p>
 
+  <a href="https://insureroute-frontend-758641920121.us-central1.run.app">
+    <img src="https://img.shields.io/badge/Live_Demo-Frontend-blue?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Live Demo" />
+  </a>
+  <br/>
+  <br/>
+
   [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](#)
   [![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)](#)
   [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](#)
