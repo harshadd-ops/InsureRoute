@@ -539,8 +539,8 @@ function MapLayer({ selectedRouteId, weatherData, routes, originNode, destinatio
           icon={L.divIcon({
             className: 'custom-div-icon',
             html: `<div class="p-1 bg-white rounded-full shadow-md border border-slate-200 flex items-center justify-center ${cp.is_dangerous ? 'animate-pulse border-red-400' : ''}">
-              <div class="w-6 h-6 flex items-center justify-center">
-                ${cp.is_dangerous ? '️' : '️'}
+              <div class="w-6 h-6 flex items-center justify-center text-sm">
+                ${cp.is_dangerous ? '⚠️' : '🌤️'}
               </div>
             </div>`,
             iconSize: [28, 28],
@@ -1271,6 +1271,9 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
       else if (coverageTier === 'comprehensive') tierMult = 1.0;
       else if (coverageTier === 'all_risk') tierMult = 1.4;
 
+      const etaStr = insuranceRoute?.eta || '0h 0m';
+      const etaHours = parseInt(etaStr.split('h')[0] || 0) + (parseInt(etaStr.split('m')[0].split(' ').pop() || 0) / 60);
+
       //  Calculate premium components from CARGO VALUE 
       // Incorporate trip duration into base rate modifier (longer trips = higher exposure)
       const durationMult = 1 + (etaHours * 0.02); // 2% increase per hour of travel
@@ -1287,8 +1290,6 @@ Return ONLY a raw JSON object. No markdown. No backticks. No text outside the JS
       const weatherScore  = Math.round(weatherRisk * 50);
       
       // Add distance/duration factor to make it dynamic per route
-      const etaStr = insuranceRoute?.eta || '0h 0m';
-      const etaHours = parseInt(etaStr.split('h')[0] || 0) + (parseInt(etaStr.split('m')[0].split(' ').pop() || 0) / 60);
       const durationRisk = Math.min(Math.round((etaHours || 0) * 1.5), 25);
       
       const rawScore = (baseRiskScore + weatherScore + durationRisk) * cargoRiskMult;
